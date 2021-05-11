@@ -38,8 +38,9 @@ public class PageRank {
         job.setJarByClass(PageRank.class);
 
         job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(Text .class);
+        job.setOutputValueClass(Text.class);
         job.setMapperClass(CountNodesMapper.class);
+        job.setCombinerClass(CountNodesReducer.class);
         job.setReducerClass(CountNodesReducer.class);
         //no. of reduce tasks equal 1 to enforce global sorting
         job.setNumReduceTasks(1);
