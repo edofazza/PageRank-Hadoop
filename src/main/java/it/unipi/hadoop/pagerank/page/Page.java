@@ -91,6 +91,12 @@ public class Page implements WritableComparable<Page> {
 
     @Override
     public int compareTo(Page o) {
+        if (this == o)
+            return 0;
+        else if (this.pagerank > o.pagerank)
+            return 1;
+        else if (this.pagerank < o.pagerank)
+            return -1;
         return 0;
     }
 
