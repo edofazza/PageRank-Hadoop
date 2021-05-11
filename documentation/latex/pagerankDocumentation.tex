@@ -7,6 +7,8 @@
 \usepackage{pdfpages}
 \usepackage{verbatim}
 \usepackage{listings}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
 % \usepackage[dvipsnames]{xcolor}
 \usepackage[english]{babel}
 \usepackage[labelfont=bf]{caption}
@@ -24,6 +26,10 @@
 \titleformat{\section}[hang]{\Huge\bfseries}{\thesection\hsp\textcolor{gray75}{|}\hsp}{0pt}{\Huge\bfseries}
 
 \captionsetup{labelfont=bf}
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}

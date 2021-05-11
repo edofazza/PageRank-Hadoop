@@ -1,2 +1,80 @@
 \section{PageRank}
 
+\subsection{Introduction}
+In this section a description of the MapReduce implementation of \textit{Page Rank} is given.
+The algorithm is carried out in \textbf{three distinct steps} due to the size of the inputted data:
+\begin{enumerate}
+	\item \textit{Graph Construction} phase:
+	\item \textit{Page Rank Computation} phase:
+	\item \textit{Sorting} phase:
+\end{enumerate}
+A cleanup function should be taken in consideration in each step in order to taper down the memory usage as much as possible.
+
+\subsubsection{Dangling Node (Dead Ends)}
+NOTE: special key for dangling node in order to distribute the mass lost in the iteration
+
+\subsubsection{Spider Traps}
+
+\subsection{First Phase: Graph Construction}
+DOES NOT CONSIDER NODE WITHOUT OUTGOING LINKS
+
+In the \textbf{conf} object it is contained the number of pages used, the solution tallies it without the use of MapReduce. If the file is huge this is not the smartest solution. The number of pages can be count using MapReduce and the use of a Combiner.
+
+\begin{algorithm}
+	\caption{Graph Construction Mapper}\label{Mapper}
+		\begin{algorithmic}[1]
+			\Procedure{Map}{key k, page p}
+					\State $\textit{title} \gets \textit{getTitle(d)}$
+					\State $ \textit{list$<$OutgoingLink$>$ l} \gets \textit{getOutgoingLink(d)}$
+		
+					\If {$l.length > 0$} 
+						\ForAll {OutgoingLink link \textbf{in} l}
+							\State EMIT(title, link)
+						\EndFor
+					\EndIf
+			\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+The Dangling value should be added.
+\begin{algorithm}
+	\caption{Graph Construction Reducer}\label{Reducer}
+		\begin{algorithmic}[1]
+			\Procedure{Reduce}{title t, edges $[e_1, e_2, \dots]$, numberOfPages n}
+					\State $\textit{initialPageRank} \gets \frac{1}{n} $
+					\State $ \textit{edgesString} \gets \textit{edges.toString()}$
+		
+					\State EMIT(title, \{initialPageRank, edgesString\})
+				
+			\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+
+
+\subsection{Second Phase: PageRank Estimation}
+Compute the value iterating till the pagerank of the nodes doesn't change, in the sol the iteration is fixed to 10 (the real algorithm doesn't work in this sense).
+
+In order to check if the values are the same or not a comparison between the previous output and the new one is required. \textbf{Note}: a diff should be enough.
+
+For performance we can initiate a variable for counting the number of iterations done.
+
+\begin{algorithm}
+	\caption{PageRank Computation Mapper}\label{Mapper}
+		\begin{algorithmic}[1]
+			\Procedure{Map}{key k, page p}
+					\State $\textit{title} \gets \textit{getTitle(d)}$
+					\State $ \textit{list$<$OutgoingLink$>$ l} \gets \textit{getOutgoingLink(d)}$
+		
+					\If {$l.length > 0$} 
+						\ForAll {OutgoingLink link \textbf{in} l}
+							\State EMIT(title, link)
+						\EndFor
+					\EndIf
+			\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+
+
+\subsection{Third Phase: Sorting}

@@ -1,6 +1,12 @@
 \BOOKMARK [1][-]{section.1}{Introduction}{}% 1
 \BOOKMARK [2][-]{subsection.1.1}{Description}{section.1}% 2
 \BOOKMARK [1][-]{section.2}{PageRank}{}% 3
-\BOOKMARK [1][-]{section.3}{Hadoop Implementation}{}% 4
-\BOOKMARK [1][-]{section.4}{Spark Implementation in Java}{}% 5
-\BOOKMARK [1][-]{section.5}{Spark Implementation in Python}{}% 6
+\BOOKMARK [2][-]{subsection.2.1}{Introduction}{section.2}% 4
+\BOOKMARK [3][-]{subsubsection.2.1.1}{Dangling Node \(Dead Ends\)}{subsection.2.1}% 5
+\BOOKMARK [3][-]{subsubsection.2.1.2}{Spider Traps}{subsection.2.1}% 6
+\BOOKMARK [2][-]{subsection.2.2}{First Phase: Graph Construction}{section.2}% 7
+\BOOKMARK [2][-]{subsection.2.3}{Second Phase: PageRank Estimation}{section.2}% 8
+\BOOKMARK [2][-]{subsection.2.4}{Third Phase: Sorting}{section.2}% 9
+\BOOKMARK [1][-]{section.3}{Hadoop Implementation}{}% 10
+\BOOKMARK [1][-]{section.4}{Spark Implementation in Java}{}% 11
+\BOOKMARK [1][-]{section.5}{Spark Implementation in Python}{}% 12
