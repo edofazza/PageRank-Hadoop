@@ -4,10 +4,8 @@ import it.unipi.hadoop.pagerank.countnodes.CountNodesMapper;
 import it.unipi.hadoop.pagerank.countnodes.CountNodesReducer;
 import it.unipi.hadoop.pagerank.dataparserMR.DataParserMapper;
 import it.unipi.hadoop.pagerank.dataparserMR.DataParserReducer;
-import org.apache.commons.collections.comparators.ReverseComparator;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -26,35 +24,37 @@ public class PageRank {
             System.exit(-1);
         }
 
-        countNodesJob(conf, otherArgs[0], otherArgs[1]);
-        dataParserJob(conf, otherArgs[0], otherArgs[1]);
-        //pagerankJob(conf, otherArgs[1], Integer.parseInt(otherArgs[2]));
-        //sortingJob(conf);
+        if (!countNodesJob(conf, otherArgs[0], "tmp0"))
+            System.exit(-1);
+        if (!dataParserJob(conf, otherArgs[0], "tmp1"))
+            System.exit(-1);
+        if (!pagerankJob(conf, "tmp1", "tmp2", Integer.parseInt(otherArgs[2])))
+            System.exit(-1);
+        System.exit(sortingJob(conf, "tmp2", otherArgs[1]) ? 0 : 1);
     }
 
-    private static void countNodesJob (Configuration conf, String inPath, String outPath) throws Exception {
+    private static boolean countNodesJob (Configuration conf, String inPath, String outPath) throws Exception {
         Job job  = Job.getInstance(conf, " pageRankSorter");
         job.setJarByClass(PageRank.class);
 
-        job.setOutputKeyClass( Text.class);
-        job.setOutputValueClass( Text .class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(Text .class);
         job.setMapperClass(CountNodesMapper.class);
         job.setReducerClass(CountNodesReducer.class);
         //no. of reduce tasks equal 1 to enforce global sorting
         job.setNumReduceTasks(1);
 
-        FileInputFormat.addInputPath(job,  new Path(inPath));
-        FileOutputFormat.setOutputPath(job,  new Path(outPath));
+        FileInputFormat.addInputPath(job, new Path(inPath));
+        FileOutputFormat.setOutputPath(job, new Path(outPath));
         job.setInputFormatClass(TextInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
 
-        //job.setSortComparatorClass((Class<? extends RawComparator>) ReverseComparator.class);
 
-        job.waitForCompletion(true);
+        return job.waitForCompletion(true);
     }
 
-    private static void dataParserJob(Configuration conf, String inPath, String outPath) throws Exception {
-        Job job  = Job.getInstance(conf, " pageRankSorter");
+    private static boolean dataParserJob(Configuration conf, String inPath, String outPath) throws Exception {
+        /*Job job  = Job.getInstance(conf, " pageRankSorter");
         job.setJarByClass(PageRank.class);
 
         job.setOutputKeyClass( Text.class);
@@ -71,14 +71,15 @@ public class PageRank {
 
         //job.setSortComparatorClass((Class<? extends RawComparator>) ReverseComparator.class);
 
-        job.waitForCompletion(true);
+        return job.waitForCompletion(true);*/
+        return true;
     }
 
-    private static void pagerankJob(Configuration conf, String inPath, int nIter) {
-
+    private static boolean pagerankJob(Configuration conf, String inPath, String outPath, int nIter) {
+        return true;
     }
 
-    private static void sortingJob(Configuration conf) {
-
+    private static boolean sortingJob(Configuration conf, String inPath, String outPath) {
+        return true;
     }
 }
