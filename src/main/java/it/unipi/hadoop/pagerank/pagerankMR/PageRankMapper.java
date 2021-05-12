@@ -1,11 +1,13 @@
 package it.unipi.hadoop.pagerank.pagerankMR;
 
 import it.unipi.hadoop.pagerank.page.Page;
+import it.unipi.hadoop.pagerank.page.TextArray;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class PageRankMapper extends Mapper<Text, Text, Text, Page> {
     private final Page outputPage = new Page();
@@ -21,21 +23,18 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Page> {
     protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
         String[] split = value.toString().trim().split(",");
 
-
-        if (split.length == 1)
-            danglingSum += Double.parseDouble(split[0]);
-
-        outputPage.setPagerank(Double.parseDouble(split[0]));
-        outputPage.
+        Text[] outgoingEdges = Arrays.copyOf(Arrays.copyOfRange(split, 1, split.length), split.length-1, Text[].class);
+        outputPage.set(new TextArray(outgoingEdges), Double.parseDouble(split[0]));
 
         context.write(key, outputPage);
-
-        Text[] texts = (Text[]) value.getOutgoingEdges().get();
-        double p = value.getPagerank() / value.getOutgoingEdges().get().length;
-
-        for (Text text: texts) {
-            outputPage.setPagerank(p);
-            context.write(text, outputPage);
+        
+        if (outgoingEdges.length == 0) // DANDLING
+            danglingSum += Double.parseDouble(split[0]);
+        else {
+            for (Text text : outgoingEdges) {
+                outputPage.setPagerank(Double.parseDouble(split[0]));
+                context.write(text, outputPage);
+            }
         }
     }
 
