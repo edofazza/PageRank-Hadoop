@@ -27,7 +27,7 @@ public class DataParserMapper extends Mapper<Object, Text, Text, TextArray> {
 
     @Override
     protected void cleanup(Context context) {
-        context.getConfiguration().setLong("nNodes", nPages);
+        context.getConfiguration().setLong("nNodes", nPages + context.getConfiguration().getLong("nNodes", 0));
         System.out.println("nPages: " + nPages);
     }
 
