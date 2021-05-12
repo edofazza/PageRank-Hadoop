@@ -64,7 +64,7 @@ public class PageRank {
 
     private static boolean dataParserJob(Configuration conf, String inPath, String outPath) throws Exception {
 
-        Job job = Job.getInstance(conf, "pageRankSorter");
+        Job job = Job.getInstance(conf, "pageParserJob");
         job.setJarByClass(PageRank.class);
 
         job.setMapOutputKeyClass(Text.class);

@@ -27,8 +27,7 @@ public class TextArray extends ArrayWritable {
         return (Text[]) super.get();
     }
 
-    @Override
-    public void set(Writable[] values) {
+    public void set(Text[] values) {
         super.set(values);
     }
 
