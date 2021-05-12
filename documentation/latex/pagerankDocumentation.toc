@@ -7,7 +7,7 @@
 \contentsline {subsubsection}{\numberline {2.1.2}Spider Traps}{3}{subsubsection.2.1.2}%
 \contentsline {subsection}{\numberline {2.2}First Phase: Graph Construction}{3}{subsection.2.2}%
 \contentsline {subsection}{\numberline {2.3}Second Phase: PageRank Estimation}{3}{subsection.2.3}%
-\contentsline {subsection}{\numberline {2.4}Third Phase: Sorting}{3}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.4}Third Phase: Sorting}{4}{subsection.2.4}%
 \contentsline {section}{\numberline {3}Hadoop Implementation}{5}{section.3}%
 \contentsline {section}{\numberline {4}Spark Implementation in Java}{6}{section.4}%
 \contentsline {section}{\numberline {5}Spark Implementation in Python}{7}{section.5}%

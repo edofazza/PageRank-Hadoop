@@ -5,6 +5,7 @@ import it.unipi.hadoop.pagerank.countnodes.CountNodesReducer;
 import it.unipi.hadoop.pagerank.dataparserMR.DataParserMapper;
 import it.unipi.hadoop.pagerank.dataparserMR.DataParserReducer;
 import it.unipi.hadoop.pagerank.page.Page;
+import it.unipi.hadoop.pagerank.page.TextArray;
 import it.unipi.hadoop.pagerank.pagerankMR.PageRankMapper;
 import it.unipi.hadoop.pagerank.pagerankMR.PageRankReducer;
 import org.apache.hadoop.conf.Configuration;
@@ -28,13 +29,13 @@ public class PageRank {
             System.exit(-1);
         }
 
-        if (!countNodesJob(conf, otherArgs[0], "tmp0"))
-            System.exit(-1);
+        /*if (!countNodesJob(conf, otherArgs[0], "tmp0"))
+            System.exit(-1);*/
         if (!dataParserJob(conf, otherArgs[0], "tmp1"))
             System.exit(-1);
-        if (!pagerankJob(conf, "tmp1", "tmp2", Integer.parseInt(otherArgs[2])))
+        /*if (!pagerankJob(conf, "tmp1", "tmp2", Integer.parseInt(otherArgs[2])))
             System.exit(-1);
-        System.exit(sortingJob(conf, "tmp2", otherArgs[1]) ? 0 : 1);
+        System.exit(sortingJob(conf, "tmp2", otherArgs[1]) ? 0 : 1);*/
     }
 
     private static boolean countNodesJob (Configuration conf, String inPath, String outPath) throws Exception {
@@ -59,11 +60,18 @@ public class PageRank {
     }
 
     private static boolean dataParserJob(Configuration conf, String inPath, String outPath) throws Exception {
-        /*Job job  = Job.getInstance(conf, " pageRankSorter");
+
+        setNumberOfPages(conf, "tmp0/part-r-00000");
+
+        Job job = Job.getInstance(conf, "pageRankSorter");
         job.setJarByClass(PageRank.class);
 
-        job.setOutputKeyClass( Text.class);
-        job.setOutputValueClass( Text .class);
+        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputValueClass(TextArray.class);
+
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(Text.class);
+
         job.setMapperClass(DataParserMapper.class);
         job.setReducerClass(DataParserReducer.class);
         //no. of reduce tasks equal 1 to enforce global sorting
@@ -74,10 +82,7 @@ public class PageRank {
         job.setInputFormatClass(TextInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
 
-        //job.setSortComparatorClass((Class<? extends RawComparator>) ReverseComparator.class);
-
-        return job.waitForCompletion(true);*/
-        return true;
+        return job.waitForCompletion(true);
     }
 
     private static boolean pagerankJob(Configuration conf, String inPath, String outPath, int nIter) throws Exception {
@@ -102,5 +107,24 @@ public class PageRank {
 
     private static boolean sortingJob(Configuration conf, String inPath, String outPath) throws Exception {
         return true;
+    }
+
+    /**
+     * Function that retrieves the number of page from the file generated at the first stage
+     * @param conf
+     * @param inPath
+     */
+    private static void setNumberOfPages (Configuration conf, String inPath)
+    {
+        /*try {
+            String text = new String(Files.readAllBytes(Paths.get(inPath)));
+            String[] tokens = text.split(" ");
+            conf.set("nPages", String.valueOf(tokens[1]));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+
+        // MOMENTANEAMENTE SETTATO A 2427 MANUALMENTE
+        conf.set("nPages", String.valueOf(2427));
     }
 }

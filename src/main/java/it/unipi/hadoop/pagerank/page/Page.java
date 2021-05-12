@@ -21,16 +21,15 @@ public class Page implements WritableComparable<Page> {
     }
 
     public Page(String outEstring) {
-        set(stringToTextArray(outEstring));
+        set(stringToTextArray(outEstring), 0);
     }
 
     public Page(TextArray outElist) {
-        set(outElist);
+        set(outElist, 0);
     }
 
     public Page(TextArray outgoingEdges, double pagerank) {
-        set(outgoingEdges);
-        this.pagerank = pagerank;
+        set(outgoingEdges, pagerank);
     }
 
     //********************************************
@@ -48,8 +47,9 @@ public class Page implements WritableComparable<Page> {
     //********************************************
     //              UTILITIES
     //*******************************************
-    public void set(final TextArray outgoingEdges) {
+    public void set(final TextArray outgoingEdges, final double pagerank) {
         this.outgoingEdges = outgoingEdges;
+        this.pagerank = pagerank;
     }
 
     public void setPagerank(final double pagerank) {
