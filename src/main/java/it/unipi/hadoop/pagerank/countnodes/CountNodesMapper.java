@@ -11,7 +11,7 @@ import java.io.IOException;
  * The intermediate key is always k, we need a unique key
  */
 public class CountNodesMapper extends Mapper<Object, Text, Text, LongWritable> {
-    private final Text outputKey = new Text("k");
+    private final Text outputKey = new Text("n");
     private final LongWritable outputValue = new LongWritable(1);
 
     @Override
