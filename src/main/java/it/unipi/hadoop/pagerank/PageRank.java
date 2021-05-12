@@ -64,8 +64,6 @@ public class PageRank {
 
     private static boolean dataParserJob(Configuration conf, String inPath, String outPath) throws Exception {
 
-        setNumberOfPages(conf, "tmp0/part-r-00000");
-
         Job job = Job.getInstance(conf, "pageRankSorter");
         job.setJarByClass(PageRank.class);
 
