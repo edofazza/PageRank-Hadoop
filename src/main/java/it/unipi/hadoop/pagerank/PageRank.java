@@ -130,22 +130,4 @@ public class PageRank {
         return job.waitForCompletion(true);
     }
 
-    /**
-     * Function that retrieves the number of page from the file generated at the first stage
-     * @param conf
-     * @param inPath
-     */
-    private static void setNumberOfPages (Configuration conf, String inPath)
-    {
-        /*try {
-            String text = new String(Files.readAllBytes(Paths.get(inPath)));
-            String[] tokens = text.split(" ");
-            conf.set("nPages", String.valueOf(tokens[1]));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
-
-        // MOMENTANEAMENTE SETTATO A 2427 MANUALMENTE
-        conf.set("nPages", String.valueOf(2427));
-    }
 }
