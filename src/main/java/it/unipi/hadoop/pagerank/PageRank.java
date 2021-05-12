@@ -7,6 +7,8 @@ import it.unipi.hadoop.pagerank.dataparserMR.DataParserReducer;
 import it.unipi.hadoop.pagerank.page.Page;
 import it.unipi.hadoop.pagerank.pagerankMR.PageRankMapper;
 import it.unipi.hadoop.pagerank.pagerankMR.PageRankReducer;
+import it.unipi.hadoop.pagerank.sortingMR.SortingMapper;
+import it.unipi.hadoop.pagerank.sortingMR.SortingReducer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
@@ -43,6 +45,7 @@ public class PageRank {
 
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(LongWritable.class);
+
         job.setMapperClass(CountNodesMapper.class);
         job.setCombinerClass(CountNodesReducer.class);
         job.setReducerClass(CountNodesReducer.class);
@@ -51,8 +54,8 @@ public class PageRank {
 
         FileInputFormat.addInputPath(job, new Path(inPath));
         FileOutputFormat.setOutputPath(job, new Path(outPath));
-        job.setInputFormatClass(TextInputFormat.class);
-        job.setOutputFormatClass(TextOutputFormat.class);
+        //job.setInputFormatClass(TextInputFormat.class);
+        //job.setOutputFormatClass(TextOutputFormat.class);
 
 
         return job.waitForCompletion(true);
@@ -81,7 +84,7 @@ public class PageRank {
     }
 
     private static boolean pagerankJob(Configuration conf, String inPath, String outPath, int nIter) throws Exception {
-        Job job  = Job.getInstance(conf, "PageRank");
+        Job job  = Job.getInstance(conf, "pageRank");
         job.setJarByClass(PageRank.class);
 
         job.setOutputKeyClass(Text.class);
@@ -93,14 +96,30 @@ public class PageRank {
 
         FileInputFormat.addInputPath(job, new Path(inPath));
         FileOutputFormat.setOutputPath(job, new Path(outPath));
-        job.setInputFormatClass(TextInputFormat.class);
-        job.setOutputFormatClass(TextOutputFormat.class);
+        //job.setInputFormatClass(TextInputFormat.class);
+        //job.setOutputFormatClass(TextOutputFormat.class);
 
 
         return job.waitForCompletion(true);
     }
 
     private static boolean sortingJob(Configuration conf, String inPath, String outPath) throws Exception {
-        return true;
+        Job job  = Job.getInstance(conf, "sorting");
+        job.setJarByClass(PageRank.class);
+
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(Page.class);
+        job.setMapperClass(SortingMapper.class);
+        job.setReducerClass(SortingReducer.class);
+        //no. of reduce tasks equal 1 to enforce global sorting
+        job.setNumReduceTasks(1);
+
+        FileInputFormat.addInputPath(job, new Path(inPath));
+        FileOutputFormat.setOutputPath(job, new Path(outPath));
+        job.setInputFormatClass(TextInputFormat.class);
+        //job.setOutputFormatClass(TextOutputFormat.class);
+
+
+        return job.waitForCompletion(true);
     }
 }

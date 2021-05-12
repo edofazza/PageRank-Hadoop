@@ -12,7 +12,7 @@ public class PageRankReducer extends Reducer<Text, Page, Text, Page> {
     private double danglingsMass;
     private static Double danglingsSum;
 
-    private double damping = .8;
+    private final double damping = .8;
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
