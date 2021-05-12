@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class Page implements WritableComparable<Page> {
-    //private Text title;
     private double pagerank;
     private TextArray outgoingEdges;
 
@@ -51,6 +50,10 @@ public class Page implements WritableComparable<Page> {
     //*******************************************
     public void set(final TextArray outgoingEdges) {
         this.outgoingEdges = outgoingEdges;
+    }
+
+    public void setPagerank(final double pagerank) {
+        this.pagerank = pagerank;
     }
 
     public static Page copy(final Page page) {
