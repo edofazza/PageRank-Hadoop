@@ -93,7 +93,11 @@ public class PageRank {
         job.setJarByClass(PageRank.class);
 
         job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(Page.class);
+        job.setOutputValueClass(Text.class);
+
+        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputValueClass(Page.class);
+
         job.setMapperClass(PageRankMapper.class);
         job.setReducerClass(PageRankReducer.class);
         //no. of reduce tasks equal 1 to enforce global sorting
@@ -101,8 +105,8 @@ public class PageRank {
 
         FileInputFormat.addInputPath(job, new Path(inPath));
         FileOutputFormat.setOutputPath(job, new Path(outPath));
-        //job.setInputFormatClass(TextInputFormat.class);
-        //job.setOutputFormatClass(TextOutputFormat.class);
+        job.setInputFormatClass(TextInputFormat.class);
+        job.setOutputFormatClass(TextOutputFormat.class);
 
 
         return job.waitForCompletion(true);
@@ -122,7 +126,7 @@ public class PageRank {
         FileInputFormat.addInputPath(job, new Path(inPath));
         FileOutputFormat.setOutputPath(job, new Path(outPath));
         job.setInputFormatClass(TextInputFormat.class);
-        //job.setOutputFormatClass(TextOutputFormat.class);
+        job.setOutputFormatClass(TextOutputFormat.class);
 
 
         return job.waitForCompletion(true);

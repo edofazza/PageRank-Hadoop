@@ -7,7 +7,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.IOException;
 
-public class PageRankMapper extends Mapper<Text, Page, Text, Page> {
+public class PageRankMapper extends Mapper<Text, Text, Text, Page> {
     private final Page outputPage = new Page();
     private static Double danglingSum;
     private long nNodes;
@@ -18,9 +18,15 @@ public class PageRankMapper extends Mapper<Text, Page, Text, Page> {
     }
 
     @Override
-    protected void map(Text key, Page value, Context context) throws IOException, InterruptedException {
-        if (value.getOutgoingEdges().get().length == 0)
-            danglingSum += value.getPagerank();
+    protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
+        String[] split = value.toString().trim().split(",");
+
+
+        if (split.length == 1)
+            danglingSum += Double.parseDouble(split[0]);
+
+        outputPage.setPagerank(Double.parseDouble(split[0]));
+        outputPage.
 
         context.write(key, outputPage);
 

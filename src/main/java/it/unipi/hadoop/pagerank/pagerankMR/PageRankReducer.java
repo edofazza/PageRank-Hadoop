@@ -7,7 +7,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 
-public class PageRankReducer extends Reducer<Text, Page, Text, Page> {
+public class PageRankReducer extends Reducer<Text, Page, Text, Text> {
     private long nNodes;
     private double danglingsMass;
     private static Double danglingsSum;
