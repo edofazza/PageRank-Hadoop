@@ -25,12 +25,16 @@ public class DataParserMapper extends Mapper<Object, Text, Text, TextArray> {
         context.write(outputKey, outputValue);
     }
 
-    @Override
+    /*@Override
     protected void cleanup(Context context) {
         context.getConfiguration().setLong("nNodes", nPages + context.getConfiguration().getLong("nNodes", 0));
         System.out.println("nPages: " + nPages);
-    }
+    }*/
 
+
+    //****************************
+    //          UTILITIES
+    //****************************
     private String getTitleFromDocument (String document)
     {
         String initialString = "<title>";
