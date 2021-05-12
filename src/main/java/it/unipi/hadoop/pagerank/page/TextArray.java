@@ -6,14 +6,6 @@ import org.apache.hadoop.io.Writable;
 
 public class TextArray extends ArrayWritable {
 
-    /*public TextArray() {
-        super(TextArray.class);
-    }
-
-    public TextArray(Text[] values) {
-        super(TextArray.class, values);
-    }*/
-
     public TextArray(Text[] values) {
         super(Text.class, values);
     }
@@ -24,7 +16,17 @@ public class TextArray extends ArrayWritable {
 
     @Override
     public Text[] get() {
-        return (Text[]) super.get();
+        Writable[] temp = super.get();
+        if (temp != null) {
+            int n = temp.length;
+            Text[] items = new Text[n];
+            for (int i = 0; i < temp.length; i++) {
+                items[i] = (Text)temp[i];
+            }
+            return items;
+        } else {
+            return null;
+        }
     }
 
     public void set(Text[] values) {
@@ -39,7 +41,7 @@ public class TextArray extends ArrayWritable {
         {
             if (i != 0)
             {
-                finalString.append(", ").append(values[i]);
+                finalString.append(",").append(values[i]);
             }
             else
             {

@@ -2,48 +2,29 @@ package it.unipi.hadoop.pagerank.dataparserMR;
 
 import it.unipi.hadoop.pagerank.page.TextArray;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.TaskCounter;
 
 import java.io.IOException;
 
 public class DataParserReducer extends Reducer<Text, TextArray, Text, Text> {
     private long nPages;
     private double initialPageRank;
+
+    // reuse the writable objects
     private final Text outputValue = new Text();
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
-        //nPages = Integer.parseInt(context.getConfiguration().get("nNodes"));
-        nPages = Job.getInstance(context.getConfiguration()).getCounters().findCounter(TaskCounter.MAP_INPUT_RECORDS).getValue();
+        nPages = Integer.parseInt(context.getConfiguration().get("nNodes"));
+        //nPages = Job.getInstance(context.getConfiguration()).getCounters().findCounter(TaskCounter.MAP_INPUT_RECORDS).getValue();
         initialPageRank = (double) 1 / nPages;
     }
 
     @Override
     protected void reduce(Text key, Iterable<TextArray> values, Context context) throws IOException, InterruptedException {
-        // I will obtain only one TextArray for each title (key)
-        StringBuilder value = new StringBuilder(initialPageRank + "\t");
-        if (values.iterator().hasNext())
-        {
-            TextArray textArray = values.iterator().next();
-            System.out.println(textArray);
-        }
-        /*int i=0;
-        for (Text text : values.iterator().next().get())
-        {
-            if (i != 0)
-            {
-                value.append(text.toString());
-            }
-            else
-            {
-                value.append(", ").append(text.toString());
-            }
-            i++;
-        }*/
-        outputValue.set(value.toString());
+        // I will obtain only one array for each title (key)
+        String value = initialPageRank + "," + values.iterator().next().toString();
+        outputValue.set(value);
         context.write(key, outputValue);
-        // Title, pageRank, outgoingLinks
     }
 }

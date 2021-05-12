@@ -14,27 +14,19 @@ public class DataParserMapper extends Mapper<Object, Text, Text, TextArray> {
     private final Text outputKey = new Text();
     private final TextArray outputValue = new TextArray();
 
-    private static long nPages;
-
     @Override
     protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
         String title = getTitleFromDocument(value.toString());
         outputKey.set(title);
         outputValue.set(getOutgoingLinksFromDocument(getTextFromDocument(value.toString())));
-        nPages++;
-        context.write(outputKey, outputValue);
+        context.write(outputKey, new TextArray(getOutgoingLinksFromDocument(getTextFromDocument(value.toString()))));
     }
 
-    /*@Override
-    protected void cleanup(Context context) {
-        context.getConfiguration().setLong("nNodes", nPages + context.getConfiguration().getLong("nNodes", 0));
-        System.out.println("nPages: " + nPages);
-    }*/
-
-
-    //****************************
-    //          UTILITIES
-    //****************************
+    /**
+     * Function that retrieves the title of the document
+     * @param document  Document in input to the map function
+     * @return          Title of the document
+     */
     private String getTitleFromDocument (String document)
     {
         String initialString = "<title>";
@@ -44,6 +36,11 @@ public class DataParserMapper extends Mapper<Object, Text, Text, TextArray> {
                 document.indexOf("</title>"));
     }
 
+    /**
+     * Function that retrieves the Text field of the document, in which there are the links
+     * @param document      Document to parse
+     * @return              The text field
+     */
     private String getTextFromDocument (String document)
     {
         String initialString = "<text xml:space=\"preserve\">";
@@ -52,6 +49,11 @@ public class DataParserMapper extends Mapper<Object, Text, Text, TextArray> {
                 document.indexOf("</text>"));
     }
 
+    /**
+     * Function that retrieves the outgoing links from the text field of the document
+     * @param text      Text field to analyze
+     * @return          The list of outgoing links
+     */
     private Text[] getOutgoingLinksFromDocument (String text)
     {
         List<Text> outgoingLinks = new ArrayList<>();

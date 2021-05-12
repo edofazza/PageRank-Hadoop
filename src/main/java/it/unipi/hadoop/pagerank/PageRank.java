@@ -12,6 +12,7 @@ import it.unipi.hadoop.pagerank.sortingMR.SortingMapper;
 import it.unipi.hadoop.pagerank.sortingMR.SortingReducer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -63,6 +64,8 @@ public class PageRank {
     }
 
     private static boolean dataParserJob(Configuration conf, String inPath, String outPath) throws Exception {
+
+        conf.set("nNodes", String.valueOf(2427));
 
         Job job = Job.getInstance(conf, "pageParserJob");
         job.setJarByClass(PageRank.class);
