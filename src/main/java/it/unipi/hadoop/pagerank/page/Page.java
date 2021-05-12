@@ -90,9 +90,7 @@ public class Page implements WritableComparable<Page> {
 
     @Override
     public String toString() {
-        return "Page{" +
-                ", outgoingEdges=" + outgoingEdges +     // TODO: FORMAT CORRECTLY
-                ", pagerank=" + pagerank +
-                '}';
+        return this.pagerank + "," +
+                this.outgoingEdges.toString();
     }
 }

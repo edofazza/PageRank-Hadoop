@@ -28,6 +28,8 @@ public class PageRankReducer extends Reducer<Text, Page, Text, Text> {
         double pagerankSum = 0;
         Page page = null;
 
+        Text outputValue = new Text();
+
         /*
             Check if it is a node or not, if it is a node I get the outgoings links,
             otherwise I compute the ingoing mass
@@ -48,7 +50,8 @@ public class PageRankReducer extends Reducer<Text, Page, Text, Text> {
             page.setPagerank(
                     (1-damping)/(double) nNodes + damping * (danglingsMass + pagerankSum)
             );
-            context.write(key, page);
+            outputValue.set(page.toString());
+            context.write(key, outputValue);
         }
     }
 
