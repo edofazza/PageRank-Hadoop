@@ -17,7 +17,7 @@ public class Page implements WritableComparable<Page> {
     //              CONSTRUCTORS
     //*******************************************
     public Page() {
-
+        outgoingEdges = null;
     }
 
     public Page(String outEstring) {

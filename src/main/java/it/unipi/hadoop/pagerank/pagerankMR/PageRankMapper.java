@@ -10,6 +10,12 @@ import java.io.IOException;
 public class PageRankMapper extends Mapper<Text, Page, Text, Page> {
     private final Page outputPage = new Page();
     private static Double danglingSum;
+    private long nNodes;
+
+    @Override
+    protected void setup(Context context) {
+        this.nNodes = context.getConfiguration().getLong("nNodes", 0);
+    }
 
     @Override
     protected void map(Text key, Page value, Context context) throws IOException, InterruptedException {
@@ -28,8 +34,8 @@ public class PageRankMapper extends Mapper<Text, Page, Text, Page> {
     }
 
     @Override
-    protected void cleanup(Context context) throws IOException, InterruptedException {
+    protected void cleanup(Context context) {
         Configuration conf = context.getConfiguration();
-        conf.setFloat("dangling", danglingSum.floatValue());
+        conf.setFloat("danglingsMass", danglingSum.floatValue()/(float) nNodes);
     }
 }
