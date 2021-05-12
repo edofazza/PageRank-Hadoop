@@ -18,8 +18,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
-import java.io.IOException;
-
 public class PageRank {
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
