@@ -8,8 +8,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Mapper used for parsing the documents and retrieves the interesting information
+ * KEY_INPUT: offset of the line readed by the file
+ * VALUE_INPUT: one line of the document
+ * KEY_OUTPUT: title of the document
+ * VALUE_OUTPUT: array of the outgoing links of this document
+ */
 public class DataParserMapper extends Mapper<Object, Text, Text, TextArray> {
-
     // reuse the writable objects
     private final Text outputKey = new Text();
     private final TextArray outputValue = new TextArray();

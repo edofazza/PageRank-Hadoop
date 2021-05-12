@@ -6,18 +6,23 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 
+/**
+ * Reducer used for parsing the documents and retrieves the interesting information
+ * KEY_INPUT: title of the document
+ * VALUE_INPUT: array of one element containing the TextArray of the outgoing links of this document
+ * KEY_OUTPUT: title of the document
+ * VALUE_OUTPUT: a text containing the initial page rank value and the array of the outgoing links of this document, divided by comma
+ */
 public class DataParserReducer extends Reducer<Text, TextArray, Text, Text> {
-    private long nPages;
-    private double initialPageRank;
+    private double initialPageRank; // 1 / N, with N the number of pages (or nodes in the graph)
 
     // reuse the writable objects
     private final Text outputValue = new Text();
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
-        nPages = Integer.parseInt(context.getConfiguration().get("nNodes"));
         //nPages = Job.getInstance(context.getConfiguration()).getCounters().findCounter(TaskCounter.MAP_INPUT_RECORDS).getValue();
-        initialPageRank = (double) 1 / nPages;
+        initialPageRank = (double) 1 / Integer.parseInt(context.getConfiguration().get("nNodes"));
     }
 
     @Override

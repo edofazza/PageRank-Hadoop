@@ -38,7 +38,7 @@ public class PageRank {
             System.exit(-1);
         /*if (!pagerankJob(conf, "tmp1", "tmp2", Integer.parseInt(otherArgs[2])))
             System.exit(-1);
-        System.exit(sortingJob(conf, "tmp2", otherArgs[1]) ? 0 : 1);*/
+        /*System.exit(sortingJob(conf, "tmp2", otherArgs[1]) ? 0 : 1);*/
     }
 
     private static boolean countNodesJob (Configuration conf, String inPath, String outPath) throws Exception {
@@ -65,6 +65,7 @@ public class PageRank {
 
     private static boolean dataParserJob(Configuration conf, String inPath, String outPath) throws Exception {
 
+        // TODO: cambiare il modo per ottenere il numero dei nodi
         conf.set("nNodes", String.valueOf(2427));
 
         Job job = Job.getInstance(conf, "pageParserJob");
