@@ -14,12 +14,20 @@ public class DataParserMapper extends Mapper<Object, Text, Text, TextArray> {
     private final Text outputKey = new Text();
     private final TextArray outputValue = new TextArray();
 
+    private static long nPages;
+
     @Override
     protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
         String title = getTitleFromDocument(value.toString());
         outputKey.set(title);
         outputValue.set(getOutgoingLinksFromDocument(getTextFromDocument(value.toString())));
+        nPages++;
         context.write(outputKey, outputValue);
+    }
+
+    @Override
+    protected void cleanup(Context context) {
+        context.getConfiguration().setLong("nPages", nPages);
     }
 
     private String getTitleFromDocument (String document)
