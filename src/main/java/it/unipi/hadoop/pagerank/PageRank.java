@@ -11,6 +11,7 @@ import it.unipi.hadoop.pagerank.pagerankMR.PageRankReducer;
 import it.unipi.hadoop.pagerank.sortingMR.SortingMapper;
 import it.unipi.hadoop.pagerank.sortingMR.SortingReducer;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -23,19 +24,24 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 public class PageRank {
     private static final int HOW_MANY_REDUCER = 3;
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 
+        long nNodes = 0;
+
         if (otherArgs.length != 3) {
             System.err.println("Usage: PageRank <input path> <output path> <# of iterations>");
             System.exit(-1);
         }
 
-        /*if (!countNodesJob(conf, otherArgs[0], "tmp0"))
-            System.exit(-1);*/
+        if (!countNodesJob(conf, otherArgs[0], "tmp0"))
+            System.exit(-1);
         if (!dataParserJob(conf, otherArgs[0], "tmp1"))
             System.exit(-1);
         /*if (!pagerankJob(conf, "tmp1", "tmp2", Integer.parseInt(otherArgs[2])))
@@ -67,7 +73,7 @@ public class PageRank {
     private static boolean dataParserJob(Configuration conf, String inPath, String outPath) throws Exception {
 
         // TODO: cambiare il modo in cui si ottiene il numero di pagine
-        conf.set("nNodes", String.valueOf(2427));
+        conf.setLong("nNodes", readNumber(conf, "tmp0/part-r-00000", "n"));
 
         Job job = Job.getInstance(conf, "pageParserJob");
         job.setJarByClass(PageRank.class);
@@ -134,6 +140,34 @@ public class PageRank {
 
 
         return job.waitForCompletion(true);
+    }
+
+    private static long readNumber(Configuration conf, String pathString, String pattern)
+            throws Exception {
+        long result = 0;
+        FileSystem hdfs = FileSystem.get(conf);
+
+        BufferedReader br=new BufferedReader(new InputStreamReader(hdfs.open(new Path(pathString))));
+        try {
+            String line;
+            line=br.readLine();
+            while (line != null){
+                if (line.startsWith(pattern)) {
+                    result = Long.parseLong(line.split("\t")[1]);
+                    break;
+                }
+
+                // be sure to read the next line otherwise you'll get an infinite loop
+                line = br.readLine();
+            }
+        } finally {
+            // you should close out the BufferedReader
+            br.close();
+        }
+        //Delete temp directory
+        //hdfs.delete(new Path(pathString), true);
+
+        return result;
     }
 
 }
