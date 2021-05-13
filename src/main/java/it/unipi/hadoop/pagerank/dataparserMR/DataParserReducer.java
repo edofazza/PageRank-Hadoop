@@ -21,7 +21,7 @@ public class DataParserReducer extends Reducer<Text, TextArray, Text, Text> {
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
-        //nPages = Job.getInstance(context.getConfiguration()).getCounters().findCounter(TaskCounter.MAP_INPUT_RECORDS).getValue();
+        //long nPages = Job.getInstance(context.getConfiguration()).getCounters().findCounter(TaskCounter.MAP_INPUT_RECORDS).getValue();
         initialPageRank = (double) 1 / Integer.parseInt(context.getConfiguration().get("nNodes"));
     }
 

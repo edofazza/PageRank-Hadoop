@@ -16,6 +16,7 @@ import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.TaskCounter;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -23,6 +24,7 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 public class PageRank {
+    private static final int HOW_MANY_REDUCER = 3;
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
@@ -56,16 +58,15 @@ public class PageRank {
 
         FileInputFormat.addInputPath(job, new Path(inPath));
         FileOutputFormat.setOutputPath(job, new Path(outPath));
-        //job.setInputFormatClass(TextInputFormat.class);
-        //job.setOutputFormatClass(TextOutputFormat.class);
-
+        job.setInputFormatClass(TextInputFormat.class);
+        job.setOutputFormatClass(TextOutputFormat.class);
 
         return job.waitForCompletion(true);
     }
 
     private static boolean dataParserJob(Configuration conf, String inPath, String outPath) throws Exception {
 
-        // TODO: cambiare il modo per ottenere il numero dei nodi
+        // TODO: cambiare il modo in cui si ottiene il numero di pagine
         conf.set("nNodes", String.valueOf(2427));
 
         Job job = Job.getInstance(conf, "pageParserJob");
@@ -79,8 +80,9 @@ public class PageRank {
 
         job.setMapperClass(DataParserMapper.class);
         job.setReducerClass(DataParserReducer.class);
-        //no. of reduce tasks equal 1 to enforce global sorting
-        job.setNumReduceTasks(1);
+
+        // I can use all the machines for running the reduce task, i will obtain 3 different output files
+        job.setNumReduceTasks(HOW_MANY_REDUCER);
 
         FileInputFormat.addInputPath(job,  new Path(inPath));
         FileOutputFormat.setOutputPath(job,  new Path(outPath));
