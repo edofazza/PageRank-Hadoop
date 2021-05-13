@@ -6,7 +6,9 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class PageRankMapper extends Mapper<Object, Text, Text, Page> {
     private final Text outputKey = new Text();
@@ -26,8 +28,13 @@ public class PageRankMapper extends Mapper<Object, Text, Text, Page> {
 
         String[] split = keyValueSplit[1].trim().split(",");
 
+        List<Text> list= new ArrayList<>();
+        //Text[] outgoingEdges = Arrays.copyOf(Arrays.copyOfRange(split, 1, split.length), split.length-1, Text[].class);
+        for (int i = 1; i < split.length; i++)
+            list.add(new Text(split[i]));
 
-        Text[] outgoingEdges = Arrays.copyOf(Arrays.copyOfRange(split, 1, split.length), split.length-1, Text[].class);
+        Text[] outgoingEdges = list.toArray(new Text[0]);
+
         outputPage.set(new TextArray(outgoingEdges), Double.parseDouble(split[0]));
 
         context.write(outputKey, outputPage);
