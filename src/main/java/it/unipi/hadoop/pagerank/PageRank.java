@@ -19,6 +19,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.TaskCounter;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
@@ -44,7 +45,7 @@ public class PageRank {
             System.exit(-1);
         if (!dataParserJob(conf, otherArgs[0], "tmp1", "tmp0/part-r-00000"))
             System.exit(-1);
-        /*if (!pagerankJob(conf, "tmp1", "tmp2", Integer.parseInt(otherArgs[2])))
+        if (!pagerankJob(conf, "tmp1", "tmp2", Integer.parseInt(otherArgs[2])))
             System.exit(-1);
         /*System.exit(sortingJob(conf, "tmp2", otherArgs[1]) ? 0 : 1);*/
     }
@@ -111,7 +112,11 @@ public class PageRank {
         //no. of reduce tasks equal 1 to enforce global sorting
         job.setNumReduceTasks(1);
 
-        FileInputFormat.addInputPath(job, new Path(inPath));
+        /*MultipleInputs.addInputPath(job, new Path(inPath + "/part-r-00000"), FileInputFormat.class);
+        MultipleInputs.addInputPath(job, new Path(inPath + "/part-r-00001"), FileInputFormat.class);
+        MultipleInputs.addInputPath(job, new Path(inPath + "/part-r-00002"), FileInputFormat.class);*/
+        // TODO: ADD INPUT
+        FileInputFormat.addInputPath(job,  new Path(inPath+ "/part-r-00000"));
         FileOutputFormat.setOutputPath(job, new Path(outPath));
         job.setInputFormatClass(TextInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);

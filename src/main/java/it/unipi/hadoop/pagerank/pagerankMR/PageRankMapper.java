@@ -2,7 +2,6 @@ package it.unipi.hadoop.pagerank.pagerankMR;
 
 import it.unipi.hadoop.pagerank.page.Page;
 import it.unipi.hadoop.pagerank.page.TextArray;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
@@ -14,10 +13,10 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Page> {
     private static Double danglingSum;
     private long nNodes;
 
-    @Override
+    /*@Override
     protected void setup(Context context) {
         this.nNodes = context.getConfiguration().getLong("nNodes", 0);
-    }
+    }*/
 
     @Override
     protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
@@ -27,9 +26,11 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Page> {
         outputPage.set(new TextArray(outgoingEdges), Double.parseDouble(split[0]));
 
         context.write(key, outputPage);
-        
+
+        Text t = new Text("DANGLING");
         if (outgoingEdges.length == 0) // DANDLING
-            danglingSum += Double.parseDouble(split[0]);
+            context.write(t, outputPage);
+            //danglingSum += Double.parseDouble(split[0]);
         else {
             for (Text text : outgoingEdges) {
                 outputPage.setPagerank(Double.parseDouble(split[0]));
@@ -38,9 +39,9 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Page> {
         }
     }
 
-    @Override
+    /*@Override
     protected void cleanup(Context context) {
         Configuration conf = context.getConfiguration();
         conf.setFloat("danglingsMass", danglingSum.floatValue()/(float) nNodes);
-    }
+    }*/
 }

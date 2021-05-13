@@ -1,7 +1,6 @@
 package it.unipi.hadoop.pagerank.pagerankMR;
 
 import it.unipi.hadoop.pagerank.page.Page;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
@@ -17,7 +16,6 @@ public class PageRankReducer extends Reducer<Text, Page, Text, Text> {
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         this.nNodes = context.getConfiguration().getLong("nNodes", 10);
-        this.danglingsMass = context.getConfiguration().getFloat("danglingsMass", 0);
     }
 
     /*
@@ -44,20 +42,22 @@ public class PageRankReducer extends Reducer<Text, Page, Text, Text> {
         if (page == null)
             return;
 
-        if (page.getOutgoingEdges().get().length == 0) // DANGLING
-            danglingsSum += pagerankSum;
-        else {
+        if (page.getOutgoingEdges().get().length == 0) {// DANGLING
+            outputValue.set(Double.toString(pagerankSum));
+            context.write(key, outputValue);
+        } else {
             page.setPagerank(
-                    (1-damping)/(double) nNodes + damping * (danglingsMass + pagerankSum)
+                    //(1-damping)/(double) nNodes + damping * (danglingsMass + pagerankSum)
+                    (1-damping)/(double) nNodes + damping * pagerankSum
             );
             outputValue.set(page.toString());
             context.write(key, outputValue);
         }
     }
 
-    @Override
+    /*@Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
         conf.setFloat("danglingsMass", danglingsSum.floatValue()/(float) nNodes);
-    }
+    }*/
 }
