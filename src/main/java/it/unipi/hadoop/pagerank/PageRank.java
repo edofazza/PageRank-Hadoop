@@ -42,7 +42,7 @@ public class PageRank {
 
         if (!countNodesJob(conf, otherArgs[0], "tmp0"))
             System.exit(-1);
-        if (!dataParserJob(conf, otherArgs[0], "tmp1"))
+        if (!dataParserJob(conf, otherArgs[0], "tmp1", "tmp0/part-r-00000"))
             System.exit(-1);
         /*if (!pagerankJob(conf, "tmp1", "tmp2", Integer.parseInt(otherArgs[2])))
             System.exit(-1);
@@ -70,10 +70,8 @@ public class PageRank {
         return job.waitForCompletion(true);
     }
 
-    private static boolean dataParserJob(Configuration conf, String inPath, String outPath) throws Exception {
-
-        // TODO: cambiare il modo in cui si ottiene il numero di pagine
-        conf.setLong("nNodes", readNumber(conf, "tmp0/part-r-00000", "n"));
+    private static boolean dataParserJob(Configuration conf, String inPath, String outPath, String inDataPath) throws Exception {
+        conf.setLong("nNodes", readNumber(conf, inDataPath, "n"));
 
         Job job = Job.getInstance(conf, "pageParserJob");
         job.setJarByClass(PageRank.class);
