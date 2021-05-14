@@ -8,8 +8,6 @@ import java.io.IOException;
 
 public class PageRankReducer extends Reducer<Text, Page, Text, Text> {
     private long nNodes;
-    private double danglingsMass;
-    private static Double danglingsSum;
 
     private final double damping = .8;
 
