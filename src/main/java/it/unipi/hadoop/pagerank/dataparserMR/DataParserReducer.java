@@ -1,6 +1,6 @@
 package it.unipi.hadoop.pagerank.dataparserMR;
 
-import it.unipi.hadoop.pagerank.page.TextArray;
+import it.unipi.hadoop.pagerank.model.TextArray;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
@@ -20,9 +20,8 @@ public class DataParserReducer extends Reducer<Text, TextArray, Text, Text> {
     private final Text outputValue = new Text();
 
     @Override
-    protected void setup(Context context) throws IOException, InterruptedException {
-        //long nPages = Job.getInstance(context.getConfiguration()).getCounters().findCounter(TaskCounter.MAP_INPUT_RECORDS).getValue();
-        initialPageRank = (double) 1 / Integer.parseInt(context.getConfiguration().get("nNodes"));
+    protected void setup(Context context) {
+        initialPageRank = (double) 1 / Long.parseLong(context.getConfiguration().get("nNodes"));
     }
 
     @Override

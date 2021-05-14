@@ -1,7 +1,7 @@
 package it.unipi.hadoop.pagerank.pagerankMR;
 
-import it.unipi.hadoop.pagerank.page.Page;
-import it.unipi.hadoop.pagerank.page.TextArray;
+import it.unipi.hadoop.pagerank.model.Node;
+import it.unipi.hadoop.pagerank.model.TextArray;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
@@ -9,9 +9,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PageRankMapper extends Mapper<Object, Text, Text, Page> {
+public class PageRankMapper extends Mapper<Object, Text, Text, Node> {
     private final Text outputKey = new Text();
-    private final Page outputPage = new Page();
+    private final Node outputNode = new Node();
 
 
      /*
@@ -51,20 +51,20 @@ public class PageRankMapper extends Mapper<Object, Text, Text, Page> {
 
         Text[] outgoingEdges = list.toArray(new Text[0]);
 
-        outputPage.set(new TextArray(outgoingEdges), Double.parseDouble(split[0]));
+        outputNode.set(new TextArray(outgoingEdges), Double.parseDouble(split[0]));
 
         // SEND OUTGOING EDGES
-        context.write(outputKey, outputPage);
+        context.write(outputKey, outputNode);
 
         Text t = new Text("DANGLING");
         if (outgoingEdges.length == 0) // DANGLING
-            context.write(t, outputPage);
+            context.write(t, outputNode);
             //danglingSum += Double.parseDouble(split[0]);
         else {  // IF NOT DANDLING SEND MASS TO OTHER NODES
             double massToSend = Double.parseDouble(split[0])/ outgoingEdges.length;
             for (Text text : outgoingEdges) {
-                outputPage.setPagerank(massToSend);
-                context.write(text, outputPage);
+                outputNode.setPagerank(massToSend);
+                context.write(text, outputNode);
             }
         }
     }

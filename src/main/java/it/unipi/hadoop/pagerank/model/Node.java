@@ -1,4 +1,4 @@
-package it.unipi.hadoop.pagerank.page;
+package it.unipi.hadoop.pagerank.model;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
@@ -8,7 +8,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class Page implements WritableComparable<Page> {
+public class Node implements WritableComparable<Node> {
     private double pagerank;
     private TextArray outgoingEdges;
 
@@ -16,19 +16,19 @@ public class Page implements WritableComparable<Page> {
     //********************************************
     //              CONSTRUCTORS
     //*******************************************
-    public Page() {
+    public Node() {
         outgoingEdges = null;
     }
 
-    public Page(String outEstring) {
+    public Node(String outEstring) {
         set(stringToTextArray(outEstring), 0);
     }
 
-    public Page(TextArray outElist) {
+    public Node(TextArray outElist) {
         set(outElist, 0);
     }
 
-    public Page(TextArray outgoingEdges, double pagerank) {
+    public Node(TextArray outgoingEdges, double pagerank) {
         set(outgoingEdges, pagerank);
     }
 
@@ -56,8 +56,8 @@ public class Page implements WritableComparable<Page> {
         this.pagerank = pagerank;
     }
 
-    public static Page copy(final Page page) {
-        return new Page(page.getOutgoingEdges(), page.pagerank);
+    public static Node copy(final Node node) {
+        return new Node(node.getOutgoingEdges(), node.pagerank);
     }
 
     public TextArray stringToTextArray(String edges) {
@@ -79,7 +79,7 @@ public class Page implements WritableComparable<Page> {
     }
 
     @Override
-    public int compareTo(Page o) {
+    public int compareTo(Node o) {
         if (this == o)
             return 0;
         else if (this.pagerank > o.pagerank)

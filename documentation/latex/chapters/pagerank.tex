@@ -9,18 +9,20 @@ The algorithm is carried out in \textbf{four distinct steps}:
 	\item \textit{Page Rank Computation} phase
 	\item \textit{Sorting} phase
 \end{enumerate}
-HADOOP: A cleanup function is runned after each step in order to taper down the memory usage as much as possible.
+
+
+\noindent We have decided to represent the structure of the graph through adjacency lists, so each node (that represents a page) will keep the list of outgoing edges as status information, as well as its ranking.
 
 
 
 \subsection{First Phase: Nodes Counting}
-To compute PageRank the total number of nodes is required. Considering that the number of nodes is unknown at the beginning –and may be huge–, this is assessed by using a MapReduce approach for optimization reasons in the following way:
+To compute PageRank the total number of nodes is required. Considering that the number of nodes is unknown at the beginning –and may be huge–, this is assessed by using a MapReduce approach for optimization reasons.
 
 
 \begin{algorithm}[H]
 	\caption{Nodes Counter Mapper}\label{Mapper}
 		\begin{algorithmic}[1]
-			\Procedure{Map}{pageid id, page p}
+			\Procedure{Map}{PageId id, Page p}
 					\If {p is not empty}
 						\State EMIT(uniqueKey, 1) 
 					\EndIf
@@ -32,25 +34,23 @@ To compute PageRank the total number of nodes is required. Considering that the 
 \begin{algorithm}[H]
 	\caption{Nodes Counter Reducer}\label{Reducer}
 		\begin{algorithmic}[1]
-			\Procedure{Reduce}{key k, values $[v_1, v_2, \dots]$}
+			\Procedure{Reduce}{Key k, Values $[v_1, v_2, \dots]$}
 					\ForAll {value \textbf{in} values}
 						\State $sum \gets sum + value$
 					\EndFor
-					\State EMIT(k, sum)
+					\State EMIT(N, sum)
 			\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
 
 
 \subsection{Second Phase: Graph Construction}
-In this phase we parse the information in the input file removing all the uninterested fields (e.g., content of the webpage). Also, to each page, we provide the initial PageRank thanks to the already calculated total number of nodes.
+In this phase we parse the information in the input file taking the information that interests us, i.e. the title of the page and the outgoing edges. Also, to each page, we provide the initial PageRank thanks to the already calculated total number of nodes. 
 
 \begin{algorithm}[H]
 	\caption{Graph Construction Mapper}\label{Mapper}
 		\begin{algorithmic}[1]
-			\Procedure{Map}{key k, page p}
-					\State outgoingEdges \textbf{new} \textit{AssociativeArray}
-			
+			\Procedure{Map}{PageId id, Page p}
 					\State $\textit{title} \gets \textit{getTitle(p)}$
 					\State $ outgoingEdges \gets \textit{getOutgoingEdges(p)}$
 		
@@ -68,7 +68,7 @@ In this phase we parse the information in the input file removing all the uninte
 				\State $N \gets c.numberOfNodes$
 			\EndProcedure
 		
-			\Procedure{Reduce}{title t, edges $[e_1, e_2, \dots]$}
+			\Procedure{Reduce}{Title t, ListOflistOfEdges $[e_1, e_2, \dots]$}
 					\State $\textit{initialPageRank} \gets \frac{1}{N} $
 					\State $ \textit{edges} \gets e_1$
 		
@@ -78,25 +78,25 @@ In this phase we parse the information in the input file removing all the uninte
 		\end{algorithmic}
 \end{algorithm}
 
-In \textit{Algorithm 4} only $e_1$ is considered because each page is never reduplicated in the dataset, thus in the mapper the key produced is always unique (i.e., the list of values in the reducer will be made up just by one item).
+\noindent In \textit{Algorithm 4} only $e_1$ is considered because the title is a unique identifier of the pages, so the list of input values will always consist of a single element. Only one mapper will manage one page.
 
 \subsection{Third Phase: PageRank Estimation}
 In this section, the relaxed pagerank iteration is presented. In the computation, we did not redistribute the probability mass lost by dangling nodes since it was not requested by the project specification, but a special key (i.e., \textbf{DANGLING}) is used for taken into account the total mass lost.
 
-The number of iteration is fixed at the start of the execution. We do not converge to a (or a more or less) consistent state, because the presence of dangling nodes will cause importance (i.e., pagerank mass) to leak out.
+\noindent The number of iteration is fixed at the start of the execution. We do not converge to a (or a more or less) consistent state, because the presence of dangling nodes will cause importance (i.e., pagerank mass) to leak out.
 
 \begin{algorithm}
 	\caption{PageRank Computation Mapper}\label{Mapper}
 		\begin{algorithmic}[1]
-			\Procedure{Map}{key k, formattedPage p}
+			\Procedure{Map}{Key k, Node n}
 			
-				\State EMIT(p.title, \{0, p.outgoingEdges\})
-				\If{p.outgoingEdges \textbf{is not} empty}
-					\ForAll{outgoingEdge \textbf{in} p.outgoingEdges}
+				\State EMIT(n.title, \{0, n.outgoingEdges\})
+				\If{n.outgoingEdges \textbf{is not} empty}
+					\ForAll{outgoingEdge \textbf{in} n.outgoingEdges}
 						\State EMIT(outgoingEdge, $\{\frac{p.pagerank}{p.outgoingEdges.length}, NULL\}$)
 					\EndFor
 				\Else
-					\State EMIT(DANGLING, \{p.pagerank, NULL\})
+					\State EMIT(DANGLING, \{n.pagerank, NULL\})
 				\EndIf
 			\EndProcedure
 	\end{algorithmic}
@@ -112,23 +112,23 @@ Note: \textit{outgoingEdge} is a title itself.
 				\State $D \gets Damping$
 			\EndProcedure
 		
-			\Procedure{Reduce}{title t, pages $[p_1, p_2, \dots]$}
+			\Procedure{Reduce}{Title t, Nodes $[n_1, n_2, \dots]$}
 				\If{title = DANGLING}
-					\ForAll {page \textbf{in} pages}
-						\State $s \gets s + page.pagerank$	
+					\ForAll {node \textbf{in} nodes}
+						\State $s \gets s + node.pagerank$	
 					\EndFor
 					\State EMIT(t, \{s, NULL\})
 				\Else
-					\State p \textbf{new} Page
-					\ForAll {page \textbf{in} pages}
-						\If {page.hasOutgoingEdges()}
-							\State p.outgoingEdges = page.outgoingEdges
+					\State n \textbf{new} Node
+					\ForAll {node \textbf{in} nodes}
+						\If {node.hasOutgoingEdges()}
+							\State n.outgoingEdges = node.outgoingEdges
 						\Else
-							\State $s = s + page.pagerank$
+							\State $s = s + node.pagerank$
 						\EndIf
 					\EndFor
-					\State$p.pagerank =  \frac{(1-D)}{N} + D*s$
-					\State EMIT(t, p)
+					\State$n.pagerank =  \frac{(1-D)}{N} + D*s$
+					\State EMIT(t, n)
 				\EndIf
 			\EndProcedure
 	\end{algorithmic}
@@ -142,9 +142,9 @@ The final step is sorting the webpages by decreasing rank, this is done making a
 \begin{algorithm}[H]
 	\caption{Sorting Mapper}\label{Mapper}
 		\begin{algorithmic}[1]
-			\Procedure{Map}{key k, formattedPage p}
-					\State $title \gets p.title$
-					\State $pagerank \gets p.pagerank$
+			\Procedure{Map}{Key k, Node n}
+					\State $title \gets n.title$
+					\State $pagerank \gets n.pagerank$
 					\State EMIT(pagerank, title)
 			\EndProcedure
 	\end{algorithmic}

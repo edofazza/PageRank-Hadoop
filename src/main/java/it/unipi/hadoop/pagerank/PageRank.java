@@ -4,8 +4,8 @@ import it.unipi.hadoop.pagerank.countnodes.CountNodesMapper;
 import it.unipi.hadoop.pagerank.countnodes.CountNodesReducer;
 import it.unipi.hadoop.pagerank.dataparserMR.DataParserMapper;
 import it.unipi.hadoop.pagerank.dataparserMR.DataParserReducer;
-import it.unipi.hadoop.pagerank.page.Page;
-import it.unipi.hadoop.pagerank.page.TextArray;
+import it.unipi.hadoop.pagerank.model.Node;
+import it.unipi.hadoop.pagerank.model.TextArray;
 import it.unipi.hadoop.pagerank.pagerankMR.PageRankMapper;
 import it.unipi.hadoop.pagerank.pagerankMR.PageRankReducer;
 import it.unipi.hadoop.pagerank.sortingMR.SortingMapper;
@@ -13,14 +13,11 @@ import it.unipi.hadoop.pagerank.sortingMR.SortingReducer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.TaskCounter;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
@@ -115,7 +112,7 @@ public class PageRank {
             job.setOutputValueClass(Text.class);
 
             job.setMapOutputKeyClass(Text.class);
-            job.setMapOutputValueClass(Page.class);
+            job.setMapOutputValueClass(Node.class);
 
             job.setMapperClass(PageRankMapper.class);
             job.setReducerClass(PageRankReducer.class);

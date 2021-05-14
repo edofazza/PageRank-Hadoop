@@ -1,4 +1,4 @@
-package it.unipi.hadoop.pagerank.page;
+package it.unipi.hadoop.pagerank.model;
 
 import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.Text;

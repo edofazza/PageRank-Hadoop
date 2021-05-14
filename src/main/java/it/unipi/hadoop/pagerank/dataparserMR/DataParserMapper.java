@@ -1,6 +1,6 @@
 package it.unipi.hadoop.pagerank.dataparserMR;
 
-import it.unipi.hadoop.pagerank.page.TextArray;
+import it.unipi.hadoop.pagerank.model.TextArray;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
