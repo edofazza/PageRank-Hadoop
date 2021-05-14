@@ -134,7 +134,8 @@ public class PageRank {
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
         job.setMapOutputKeyClass(DoubleWritable.class);
-        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputValueClass(Text.class);
+
         job.setMapperClass(SortingMapper.class);
         job.setReducerClass(SortingReducer.class);
         //no. of reduce tasks equal 1 to enforce global sorting
