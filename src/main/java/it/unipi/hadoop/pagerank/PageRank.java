@@ -48,7 +48,7 @@ public class PageRank {
 
         if (!pagerankJob(conf, "tmp1", "tmp2", Integer.parseInt(otherArgs[2])))
             System.exit(-1);
-        System.exit(sortingJob(conf, "tmp2/iter" + (Integer.parseInt(otherArgs[2])-1), "tmp3") ? 0 : 1);
+        System.exit(sortingJob(conf, "tmp2/iter" + (Integer.parseInt(otherArgs[2])-1), otherArgs[0]) ? 0 : 1);
     }
 
     private static boolean countNodesJob (Configuration conf, String inPath, String outPath) throws Exception {
