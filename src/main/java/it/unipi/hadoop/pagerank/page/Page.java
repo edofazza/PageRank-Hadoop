@@ -74,6 +74,7 @@ public class Page implements WritableComparable<Page> {
     @Override
     public void readFields(DataInput dataInput) throws IOException {
         this.pagerank = dataInput.readDouble();
+        outgoingEdges = new TextArray();
         outgoingEdges.readFields(dataInput);
     }
 
