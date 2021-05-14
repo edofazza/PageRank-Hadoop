@@ -88,16 +88,16 @@ In this section, the relaxed pagerank iteration is presented. In the computation
 \begin{algorithm}
 	\caption{PageRank Computation Mapper}\label{Mapper}
 		\begin{algorithmic}[1]
-			\Procedure{Map}{Key k, Node n}
+						\Procedure{Map}{Key k, FormattedPage p}
 			
-				\State EMIT(n.title, \{0, n.outgoingEdges\})
-				\If{n.outgoingEdges \textbf{is not} empty}
-					\ForAll{outgoingEdge \textbf{in} n.outgoingEdges}
-						\State EMIT(outgoingEdge, $\{\frac{p.pagerank}{p.outgoingEdges.length}, NULL\}$)
-					\EndFor
-				\Else
-					\State EMIT(DANGLING, \{n.pagerank, NULL\})
-				\EndIf
+			\State EMIT(p.title, \{0, p.outgoingEdges\})
+			\If{p.outgoingEdges \textbf{is not} empty}
+			\ForAll{outgoingEdge \textbf{in} p.outgoingEdges}
+			\State EMIT(outgoingEdge, $\{\frac{p.pagerank}{p.outgoingEdges.length}, NULL\}$)
+			\EndFor
+			\Else
+			\State EMIT(DANGLING, \{p.pagerank, NULL\})
+			\EndIf
 			\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
@@ -141,22 +141,22 @@ The final step is sorting the webpages by decreasing rank, this is done making a
 
 \begin{algorithm}[H]
 	\caption{Sorting Mapper}\label{Mapper}
-		\begin{algorithmic}[1]
-			\Procedure{Map}{Key k, Node n}
-					\State $title \gets n.title$
-					\State $pagerank \gets n.pagerank$
-					\State EMIT(pagerank, title)
-			\EndProcedure
+	\begin{algorithmic}[1]
+		\Procedure{Map}{Key k, FormattedPage p}
+		\State $title \gets p.title$
+		\State $pagerank \gets p.pagerank$k
+		\State EMIT(pagerank, title)
+		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}[H]
 	\caption{Sorting Reducer}\label{Reducer}
-		\begin{algorithmic}[1]
-			\Procedure{Reduce}{pagerank rank, titles $[t_1, t_2, \dots]$}
-					\ForAll {title \textbf{in} titles}
-						\State EMIT(title, rank)
-					\EndFor
-			\EndProcedure
+	\begin{algorithmic}[1]
+		\Procedure{Reduce}{Pagerank rank, Titles $[t_1, t_2, \dots]$}
+		\ForAll {title \textbf{in} titles}
+		\State EMIT(title, rank)
+		\EndFor
+		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}

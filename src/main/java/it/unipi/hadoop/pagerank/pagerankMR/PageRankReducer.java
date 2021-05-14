@@ -18,7 +18,7 @@ public class PageRankReducer extends Reducer<Text, Node, Text, Text> {
     }
 
     /*
-       pagerank' = (1 - damping)/nNodes + damping/nNodes * (danglingMass + pagerank)
+       pagerank' = (1 - damping)/nNodes + damping/nNodes * (danglingMass + pagerankSum)
      */
     @Override
     protected void reduce(Text key, Iterable<Node> values, Context context) throws IOException, InterruptedException {
