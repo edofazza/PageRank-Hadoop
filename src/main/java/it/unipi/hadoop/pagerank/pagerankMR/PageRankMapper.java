@@ -31,10 +31,26 @@ public class PageRankMapper extends Mapper<Object, Text, Text, Page> {
 
         outputPage.set(new TextArray(outgoingEdges), Double.parseDouble(split[0]));
 
+        // SEND OUTGOING EDGES
         context.write(outputKey, outputPage);
 
+
+        /*
+            (1) -> (2) (3)
+            (2) -> ...
+            OUTPUT:
+                (1) -> (2) (3)
+                (2) massa/2
+                (3) massa/2
+
+                (2) -> ...
+
+            REDUCER
+                (2) -> ... mass
+         */
+
         Text t = new Text("DANGLING");
-        if (outgoingEdges.length == 0) // DANDLING
+        if (outgoingEdges.length == 0) // DANGLING
             context.write(t, outputPage);
             //danglingSum += Double.parseDouble(split[0]);
         else {  // IF NOT DANDLING SEND MASS TO OTHER NODES

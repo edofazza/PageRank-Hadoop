@@ -14,6 +14,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.ArrayWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -30,6 +31,7 @@ import java.io.InputStreamReader;
 
 public class PageRank {
     private static final int HOW_MANY_REDUCER = 3;
+
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
@@ -47,7 +49,7 @@ public class PageRank {
             System.exit(-1);
         if (!pagerankJob(conf, "tmp1", "tmp2", Integer.parseInt(otherArgs[2])))
             System.exit(-1);
-        /*System.exit(sortingJob(conf, "tmp2", otherArgs[1]) ? 0 : 1);*/
+        System.exit(sortingJob(conf, "tmp2", otherArgs[1]) ? 0 : 1);
     }
 
     private static boolean countNodesJob (Configuration conf, String inPath, String outPath) throws Exception {
@@ -131,6 +133,8 @@ public class PageRank {
 
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
+        job.setMapOutputKeyClass(DoubleWritable.class);
+        job.setMapOutputKeyClass(Text.class);
         job.setMapperClass(SortingMapper.class);
         job.setReducerClass(SortingReducer.class);
         //no. of reduce tasks equal 1 to enforce global sorting
