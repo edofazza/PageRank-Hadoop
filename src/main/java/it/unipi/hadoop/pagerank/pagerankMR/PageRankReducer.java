@@ -54,10 +54,4 @@ public class PageRankReducer extends Reducer<Text, Page, Text, Text> {
             context.write(key, outputValue);
         }
     }
-
-    /*@Override
-    protected void cleanup(Context context) throws IOException, InterruptedException {
-        Configuration conf = context.getConfiguration();
-        conf.setFloat("danglingsMass", danglingsSum.floatValue()/(float) nNodes);
-    }*/
 }
