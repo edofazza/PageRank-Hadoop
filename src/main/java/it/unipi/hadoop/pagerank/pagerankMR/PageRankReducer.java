@@ -8,6 +8,7 @@ import java.io.IOException;
 
 public class PageRankReducer extends Reducer<Text, Page, Text, Text> {
     private long nNodes;
+    private final Text outputValue = new Text();
 
     private final double damping = .8;
 
@@ -23,8 +24,6 @@ public class PageRankReducer extends Reducer<Text, Page, Text, Text> {
     protected void reduce(Text key, Iterable<Page> values, Context context) throws IOException, InterruptedException {
         double pagerankSum = 0;
         Page page = null;
-
-        Text outputValue = new Text();
 
         /*
             Check if it is a node or not, if it is a node I get the outgoings links,

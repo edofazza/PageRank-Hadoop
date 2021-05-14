@@ -7,7 +7,6 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class PageRankMapper extends Mapper<Object, Text, Text, Page> {
@@ -15,13 +14,36 @@ public class PageRankMapper extends Mapper<Object, Text, Text, Page> {
     private final Page outputPage = new Page();
 
 
+     /*
+        SCHEMA:
+            (1) -> (2) (3)
+            (2) -> ...
+            OUTPUT:
+                (1) -> (2) (3)
+                (2) mass(1)
+                (3) mass(1)
+
+                (2) -> ...
+                ... -> mass(2)
+
+            REDUCER
+                (2) -> ... mass
+         */
+
     @Override
     protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-        String[] keyValueSplit = value.toString().split("\t");
-        outputKey.set(keyValueSplit[0]);
+        // FORMAT:
+        //      title \t pagerank, outgoing, ...
+        String[] valueSplit = value.toString().split("\t");
 
-        String[] split = keyValueSplit[1].trim().split(",");
+        // set the title as the key
+        outputKey.set(valueSplit[0]);
 
+        // FORMAT:
+        //      pagerank, outgoing, ...
+        String[] split = valueSplit[1].trim().split(",");
+
+        // TAKE THE LIST OF OUTGOING EDGES
         List<Text> list= new ArrayList<>();
         //Text[] outgoingEdges = Arrays.copyOf(Arrays.copyOfRange(split, 1, split.length), split.length-1, Text[].class);
         for (int i = 1; i < split.length; i++)
@@ -33,21 +55,6 @@ public class PageRankMapper extends Mapper<Object, Text, Text, Page> {
 
         // SEND OUTGOING EDGES
         context.write(outputKey, outputPage);
-
-
-        /*
-            (1) -> (2) (3)
-            (2) -> ...
-            OUTPUT:
-                (1) -> (2) (3)
-                (2) massa/2
-                (3) massa/2
-
-                (2) -> ...
-
-            REDUCER
-                (2) -> ... mass
-         */
 
         Text t = new Text("DANGLING");
         if (outgoingEdges.length == 0) // DANGLING

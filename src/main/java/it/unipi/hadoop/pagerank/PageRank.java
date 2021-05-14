@@ -27,16 +27,16 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class PageRank {
     private static final int HOW_MANY_REDUCER = 3;
+    private static long nNodes;
 
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-
-        long nNodes = 0;
 
         if (otherArgs.length != 3) {
             System.err.println("Usage: PageRank <input path> <output path> <# of iterations>");
@@ -47,9 +47,11 @@ public class PageRank {
             System.exit(-1);
         if (!dataParserJob(conf, otherArgs[0], "tmp1", "tmp0/part-r-00000"))
             System.exit(-1);
+        removeDirectory(conf, "tmp0");
+
         if (!pagerankJob(conf, "tmp1", "tmp2", Integer.parseInt(otherArgs[2])))
             System.exit(-1);
-        System.exit(sortingJob(conf, "tmp2", "tmp3") ? 0 : 1);
+        System.exit(sortingJob(conf, "tmp2/iter" + (Integer.parseInt(otherArgs[2])-1), "tmp3") ? 0 : 1);
     }
 
     private static boolean countNodesJob (Configuration conf, String inPath, String outPath) throws Exception {
@@ -74,7 +76,8 @@ public class PageRank {
     }
 
     private static boolean dataParserJob(Configuration conf, String inPath, String outPath, String inDataPath) throws Exception {
-        conf.setLong("nNodes", readNumber(conf, inDataPath, "n"));
+        nNodes = readNumber(conf, inDataPath, "n");
+        conf.setLong("nNodes", nNodes);
 
         Job job = Job.getInstance(conf, "pageParserJob");
         job.setJarByClass(PageRank.class);
@@ -89,7 +92,8 @@ public class PageRank {
         job.setReducerClass(DataParserReducer.class);
 
         // I can use all the machines for running the reduce task, i will obtain 3 different output files
-        job.setNumReduceTasks(HOW_MANY_REDUCER);
+        //job.setNumReduceTasks(HOW_MANY_REDUCER);
+        job.setNumReduceTasks(1);
 
         FileInputFormat.addInputPath(job,  new Path(inPath));
         FileOutputFormat.setOutputPath(job,  new Path(outPath));
@@ -100,31 +104,48 @@ public class PageRank {
     }
 
     private static boolean pagerankJob(Configuration conf, String inPath, String outPath, int nIter) throws Exception {
-        Job job  = Job.getInstance(conf, "pageRank");
-        job.setJarByClass(PageRank.class);
+        conf.setLong("nNodes", nNodes);
+        boolean result = false;
 
-        job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(Text.class);
+        for (int i = 0; i < nIter; i++) {
+            Job job = Job.getInstance(conf, "pageRank");
+            job.setJarByClass(PageRank.class);
 
-        job.setMapOutputKeyClass(Text.class);
-        job.setMapOutputValueClass(Page.class);
+            job.setOutputKeyClass(Text.class);
+            job.setOutputValueClass(Text.class);
 
-        job.setMapperClass(PageRankMapper.class);
-        job.setReducerClass(PageRankReducer.class);
-        //no. of reduce tasks equal 1 to enforce global sorting
-        job.setNumReduceTasks(1);
+            job.setMapOutputKeyClass(Text.class);
+            job.setMapOutputValueClass(Page.class);
 
-        /*MultipleInputs.addInputPath(job, new Path(inPath + "/part-r-00000"), FileInputFormat.class);
-        MultipleInputs.addInputPath(job, new Path(inPath + "/part-r-00001"), FileInputFormat.class);
-        MultipleInputs.addInputPath(job, new Path(inPath + "/part-r-00002"), FileInputFormat.class);*/
-        // TODO: ADD INPUT
-        FileInputFormat.addInputPath(job,  new Path(inPath+ "/part-r-00000"));
-        FileOutputFormat.setOutputPath(job, new Path(outPath));
-        job.setInputFormatClass(TextInputFormat.class);
-        job.setOutputFormatClass(TextOutputFormat.class);
+            job.setMapperClass(PageRankMapper.class);
+            job.setReducerClass(PageRankReducer.class);
+            //no. of reduce tasks equal 1 to enforce global sorting //TODO: USE MULTIPLE REDUCER
+            job.setNumReduceTasks(1);
 
+            /*MultipleInputs.addInputPath(job, new Path(inPath + "/part-r-00000"), FileInputFormat.class);
+            MultipleInputs.addInputPath(job, new Path(inPath + "/part-r-00001"), FileInputFormat.class);
+            MultipleInputs.addInputPath(job, new Path(inPath + "/part-r-00002"), FileInputFormat.class);*/
+            // TODO: ADD MULTIPLE INPUT
+            // CHECK IF STEP 1
+            if (i == 0) {
+                FileInputFormat.addInputPath(job, new Path(inPath + "/part-r-00000"));
+                FileOutputFormat.setOutputPath(job, new Path(outPath + "/iter" + i));
+            } else {
+                FileInputFormat.addInputPath(job, new Path(outPath + "/iter" + (i-1) + "/part-r-00000"));
+                FileOutputFormat.setOutputPath(job, new Path(outPath + "/iter" + i));
+            }
 
-        return job.waitForCompletion(true);
+            job.setInputFormatClass(TextInputFormat.class);
+            job.setOutputFormatClass(TextOutputFormat.class);
+
+            result = job.waitForCompletion(true);
+
+            if (i == 0)
+                removeDirectory(conf, inPath);
+            if (i > 0)
+                removeDirectory(conf, outPath + "/iter" + (i-1));
+        }
+        return result;
     }
 
     private static boolean sortingJob(Configuration conf, String inPath, String outPath) throws Exception {
@@ -141,6 +162,7 @@ public class PageRank {
         //no. of reduce tasks equal 1 to enforce global sorting
         job.setNumReduceTasks(1);
 
+        // TODO: IF IN THE PAGERANK USED MORE THAN 1 REDUCER USE MULTIPLE INPUT
         FileInputFormat.addInputPath(job, new Path(inPath));
         FileOutputFormat.setOutputPath(job, new Path(outPath));
         job.setInputFormatClass(TextInputFormat.class);
@@ -176,6 +198,11 @@ public class PageRank {
         //hdfs.delete(new Path(pathString), true);
 
         return result;
+    }
+
+    private static void removeDirectory(Configuration conf, String pathString) throws IOException {
+        FileSystem hdfs = FileSystem.get(conf);
+        hdfs.delete(new Path(pathString), true);
     }
 
 }
