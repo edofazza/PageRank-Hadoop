@@ -6,5 +6,11 @@
 \contentsline {subsection}{\numberline {1.4}Third Phase: PageRank Estimation}{3}{subsection.1.4}%
 \contentsline {subsection}{\numberline {1.5}Fourth Phase: Sorting}{3}{subsection.1.5}%
 \contentsline {section}{\numberline {2}Hadoop Implementation}{5}{section.2}%
-\contentsline {section}{\numberline {3}Spark Implementation in Java}{6}{section.3}%
-\contentsline {section}{\numberline {4}Spark Implementation in Python}{7}{section.4}%
+\contentsline {subsection}{\numberline {2.1}Introduction}{5}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}First Phase: Nodes Counting}{5}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Second Phase: Graph construction}{5}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Third Phase: PageRank Estimation}{5}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Forth Phase: Sorting}{5}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}Performance}{5}{subsection.2.6}%
+\contentsline {section}{\numberline {3}Spark Implementation in Java}{7}{section.3}%
+\contentsline {section}{\numberline {4}Spark Implementation in Python}{8}{section.4}%

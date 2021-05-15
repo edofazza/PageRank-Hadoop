@@ -5,5 +5,11 @@
 \BOOKMARK [2][-]{subsection.1.4}{Third Phase: PageRank Estimation}{section.1}% 5
 \BOOKMARK [2][-]{subsection.1.5}{Fourth Phase: Sorting}{section.1}% 6
 \BOOKMARK [1][-]{section.2}{Hadoop Implementation}{}% 7
-\BOOKMARK [1][-]{section.3}{Spark Implementation in Java}{}% 8
-\BOOKMARK [1][-]{section.4}{Spark Implementation in Python}{}% 9
+\BOOKMARK [2][-]{subsection.2.1}{Introduction}{section.2}% 8
+\BOOKMARK [2][-]{subsection.2.2}{First Phase: Nodes Counting}{section.2}% 9
+\BOOKMARK [2][-]{subsection.2.3}{Second Phase: Graph construction}{section.2}% 10
+\BOOKMARK [2][-]{subsection.2.4}{Third Phase: PageRank Estimation}{section.2}% 11
+\BOOKMARK [2][-]{subsection.2.5}{Forth Phase: Sorting}{section.2}% 12
+\BOOKMARK [2][-]{subsection.2.6}{Performance}{section.2}% 13
+\BOOKMARK [1][-]{section.3}{Spark Implementation in Java}{}% 14
+\BOOKMARK [1][-]{section.4}{Spark Implementation in Python}{}% 15

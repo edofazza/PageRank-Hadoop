@@ -108,12 +108,6 @@ Note: \textit{outgoingEdge} is a title itself.
 			\EndProcedure
 		
 			\Procedure{Reduce}{Title t, Nodes $[n_1, n_2, \dots]$}
-				\If{title = DANGLING}
-					\ForAll {node \textbf{in} nodes}
-						\State $s \gets s + node.pagerank$	
-					\EndFor
-					\State EMIT(t, \{s, NULL\})
-				\Else
 					\State n \textbf{new} Node
 					\ForAll {node \textbf{in} nodes}
 						\If {node.hasOutgoingEdges()}
@@ -124,7 +118,6 @@ Note: \textit{outgoingEdge} is a title itself.
 					\EndFor
 					\State$n.pagerank =  \frac{(1-D)}{N} + D*s$
 					\State EMIT(t, n)
-				\EndIf
 			\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
