@@ -116,7 +116,6 @@ public class PageRank {
             job.setMapOutputValueClass(Node.class);
 
             job.setMapperClass(PageRankMapper.class);
-            //job.setCombinerClass(PageRankCombiner.class);
             job.setReducerClass(PageRankReducer.class);
 
             job.setNumReduceTasks(HOW_MANY_REDUCER);
@@ -138,8 +137,8 @@ public class PageRank {
 
             result = job.waitForCompletion(true);
 
-           // if (i == 0)
-              //  removeDirectory(conf, inPath);
+            if (i == 0)
+                removeDirectory(conf, inPath);
             if (i > 0)
                 removeDirectory(conf, outPath + "/iter" + (i-1));
         }
