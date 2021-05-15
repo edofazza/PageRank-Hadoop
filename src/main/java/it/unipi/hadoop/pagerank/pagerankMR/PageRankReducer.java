@@ -7,8 +7,8 @@ import org.apache.hadoop.mapreduce.Reducer;
 import java.io.IOException;
 
 public class PageRankReducer extends Reducer<Text, Node, Text, Text> {
-    private long nNodes;
-    private final Text outputValue = new Text();
+    private static long nNodes;
+    private static final Text outputValue = new Text();
 
     private final double damping = .8;
 

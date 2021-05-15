@@ -11,8 +11,8 @@ import java.io.IOException;
  * The intermediate key is always n, we need a unique key
  */
 public class CountNodesMapper extends Mapper<Object, Text, Text, LongWritable> {
-    private final Text outputKey = new Text("n");
-    private final LongWritable outputValue = new LongWritable(1);
+    private static final Text outputKey = new Text("n");
+    private static final LongWritable outputValue = new LongWritable(1);
 
     @Override
     protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {

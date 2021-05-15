@@ -40,6 +40,7 @@ public class PageRank {
             System.exit(-1);
         }
 
+        removeDirectory(conf, otherArgs[1]);
         if (!countNodesJob(conf, otherArgs[0], "tmp0"))
             System.exit(-1);
         if (!dataParserJob(conf, otherArgs[0], "tmp1", "tmp0/part-r-00000"))
@@ -48,7 +49,7 @@ public class PageRank {
 
         if (!pagerankJob(conf, "tmp1", "tmp2", Integer.parseInt(otherArgs[2])))
             System.exit(-1);
-        System.exit(sortingJob(conf, "tmp2/iter" + (Integer.parseInt(otherArgs[2])-1), otherArgs[0]) ? 0 : 1);
+        System.exit(sortingJob(conf, "tmp2/iter" + (Integer.parseInt(otherArgs[2])-1), otherArgs[1]) ? 0 : 1);
     }
 
     private static boolean countNodesJob (Configuration conf, String inPath, String outPath) throws Exception {
@@ -89,8 +90,7 @@ public class PageRank {
         job.setReducerClass(DataParserReducer.class);
 
         // I can use all the machines for running the reduce task, i will obtain 3 different output files
-        //job.setNumReduceTasks(HOW_MANY_REDUCER);
-        job.setNumReduceTasks(1);
+        job.setNumReduceTasks(HOW_MANY_REDUCER);
 
         FileInputFormat.addInputPath(job,  new Path(inPath));
         FileOutputFormat.setOutputPath(job,  new Path(outPath));
@@ -105,6 +105,7 @@ public class PageRank {
         boolean result = false;
 
         for (int i = 0; i < nIter; i++) {
+            System.out.println("\n\n\n\n\nITER NUMBER " + i);
             Job job = Job.getInstance(conf, "pageRank");
             job.setJarByClass(PageRank.class);
 
@@ -116,19 +117,18 @@ public class PageRank {
 
             job.setMapperClass(PageRankMapper.class);
             job.setReducerClass(PageRankReducer.class);
-            //no. of reduce tasks equal 1 to enforce global sorting //TODO: USE MULTIPLE REDUCER
-            job.setNumReduceTasks(1);
 
-            /*MultipleInputs.addInputPath(job, new Path(inPath + "/part-r-00000"), FileInputFormat.class);
-            MultipleInputs.addInputPath(job, new Path(inPath + "/part-r-00001"), FileInputFormat.class);
-            MultipleInputs.addInputPath(job, new Path(inPath + "/part-r-00002"), FileInputFormat.class);*/
-            // TODO: ADD MULTIPLE INPUT
+            job.setNumReduceTasks(HOW_MANY_REDUCER);
+
             // CHECK IF STEP 1
             if (i == 0) {
-                FileInputFormat.addInputPath(job, new Path(inPath + "/part-r-00000"));
+                FileInputFormat.setInputPaths(job, new Path(inPath + "/part-r-00000"), new Path(inPath + "/part-r-00001"), new Path(inPath + "/part-r-00002"));
                 FileOutputFormat.setOutputPath(job, new Path(outPath + "/iter" + i));
             } else {
-                FileInputFormat.addInputPath(job, new Path(outPath + "/iter" + (i-1) + "/part-r-00000"));
+                FileInputFormat.setInputPaths(job,
+                        new Path(outPath + "/iter" + (i-1) + "/part-r-00000"),
+                        new Path(outPath + "/iter" + (i-1) + "/part-r-00001"),
+                        new Path(outPath + "/iter" + (i-1) + "/part-r-00002"));
                 FileOutputFormat.setOutputPath(job, new Path(outPath + "/iter" + i));
             }
 
@@ -159,8 +159,10 @@ public class PageRank {
         //no. of reduce tasks equal 1 to enforce global sorting
         job.setNumReduceTasks(1);
 
-        // TODO: IF IN THE PAGERANK USED MORE THAN 1 REDUCER USE MULTIPLE INPUT
-        FileInputFormat.addInputPath(job, new Path(inPath));
+        FileInputFormat.setInputPaths(job,
+                new Path(inPath + "/part-r-00000"),
+                new Path(inPath + "/part-r-00001"),
+                new Path(inPath + "/part-r-00002"));
         FileOutputFormat.setOutputPath(job, new Path(outPath));
         job.setInputFormatClass(TextInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
@@ -169,6 +171,11 @@ public class PageRank {
         return job.waitForCompletion(true);
     }
 
+
+
+    //*********************************
+    //          UTILITIES
+    //*********************************
     private static long readNumber(Configuration conf, String pathString, String pattern)
             throws Exception {
         long result = 0;
@@ -191,8 +198,6 @@ public class PageRank {
             // you should close out the BufferedReader
             br.close();
         }
-        //Delete temp directory
-        //hdfs.delete(new Path(pathString), true);
 
         return result;
     }

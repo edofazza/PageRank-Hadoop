@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PageRankMapper extends Mapper<Object, Text, Text, Node> {
-    private final Text outputKey = new Text();
-    private final Node outputNode = new Node();
+    private static final Text outputKey = new Text();
+    private static final Node outputNode = new Node();
 
 
      /*

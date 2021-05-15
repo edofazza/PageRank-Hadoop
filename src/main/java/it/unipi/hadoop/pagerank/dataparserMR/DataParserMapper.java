@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class DataParserMapper extends Mapper<Object, Text, Text, TextArray> {
     // reuse the writable objects
-    private final Text outputKey = new Text();
+    private static final Text outputKey = new Text();
     private final TextArray outputValue = new TextArray();
 
     @Override

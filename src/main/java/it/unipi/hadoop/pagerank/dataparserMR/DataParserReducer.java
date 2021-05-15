@@ -14,7 +14,7 @@ import java.io.IOException;
  * VALUE_OUTPUT: a text containing the initial page rank value and the array of the outgoing links of this document, divided by comma
  */
 public class DataParserReducer extends Reducer<Text, TextArray, Text, Text> {
-    private double initialPageRank; // 1 / N, with N the number of pages (or nodes in the graph)
+    private static double initialPageRank; // 1 / N, with N the number of pages (or nodes in the graph)
 
     // reuse the writable objects
     private final Text outputValue = new Text();

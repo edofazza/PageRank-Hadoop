@@ -11,10 +11,11 @@ import java.io.IOException;
  * The Key will be 'n', the sum of the list of values will give the number of nodes
  */
 public class CountNodesReducer extends Reducer<Text, LongWritable, Text, LongWritable> {
+    private static final LongWritable outputValue = new LongWritable();
 
     @Override
     protected void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException {
-        LongWritable outputValue = new LongWritable();
+
         long sum = 0;
         for (LongWritable value: values) {
             sum += value.get();
