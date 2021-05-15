@@ -8,12 +8,14 @@ import it.unipi.hadoop.pagerank.model.Node;
 import it.unipi.hadoop.pagerank.model.TextArray;
 import it.unipi.hadoop.pagerank.pagerankMR.PageRankMapper;
 import it.unipi.hadoop.pagerank.pagerankMR.PageRankReducer;
+import it.unipi.hadoop.pagerank.sortingMR.DescendingRankComparator;
 import it.unipi.hadoop.pagerank.sortingMR.SortingMapper;
 import it.unipi.hadoop.pagerank.sortingMR.SortingReducer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -163,6 +165,8 @@ public class PageRank {
         job.setReducerClass(SortingReducer.class);
         //no. of reduce tasks equal 1 to enforce global sorting
         job.setNumReduceTasks(1);
+
+        job.setSortComparatorClass(DescendingRankComparator.class);
 
         FileInputFormat.setInputPaths(job,
                 new Path(inPath + "/part-r-00000"),
