@@ -34,6 +34,10 @@ public class PageRank {
     private static long nNodes;
 
     public static void main(String[] args) throws Exception {
+        long start = 0;
+        long end = 0;
+        start = System.currentTimeMillis();
+
         Configuration conf = new Configuration();
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 
@@ -54,6 +58,11 @@ public class PageRank {
 
         boolean finalStatus = sortingJob(conf, "tmp2/iter" + (Integer.parseInt(otherArgs[2])-1), otherArgs[1]);
         removeDirectory(conf, "tmp2");
+
+        // TIME
+        end = System.currentTimeMillis();
+        end -= start;
+        System.out.println("EXECUTION TIME: " + end + " ms");
 
         if (!finalStatus)
             System.exit(-1);
