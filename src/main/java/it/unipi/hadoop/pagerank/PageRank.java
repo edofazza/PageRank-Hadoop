@@ -20,6 +20,7 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.KeyValueTextInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
@@ -30,7 +31,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class PageRank {
-    private static final int HOW_MANY_REDUCER = 3; // we take advantage of all the workers available
+    private static final int HOW_MANY_REDUCER = 3; // we take advantage of all the workers available, when it is possible
     private static long nNodes;
 
     public static void main(String[] args) throws Exception {
@@ -139,7 +140,7 @@ public class PageRank {
                 FileOutputFormat.setOutputPath(job, new Path(outPath + "/iter" + i));
             }
 
-            job.setInputFormatClass(TextInputFormat.class);
+            job.setInputFormatClass(KeyValueTextInputFormat.class);
             job.setOutputFormatClass(TextOutputFormat.class);
 
             result = job.waitForCompletion(true);
@@ -173,7 +174,7 @@ public class PageRank {
                 new Path(inPath + "/part-r-00001"),
                 new Path(inPath + "/part-r-00002"));
         FileOutputFormat.setOutputPath(job, new Path(outPath));
-        job.setInputFormatClass(TextInputFormat.class);
+        job.setInputFormatClass(KeyValueTextInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
 
 

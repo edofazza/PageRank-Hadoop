@@ -8,18 +8,18 @@ import java.io.IOException;
 
 /**
  * Reducer of the Page Rank process
- * KEY_INPUT:       title of the node
+ * KEY_INPUT:       title of the page
  * VALUE_INPUT:     node information
- * KEY_OUTPUT:      title of the node
- * VALUE_OUTPUT:    text representation of the node information
+ * KEY_OUTPUT:      title of the page
+ * VALUE_OUTPUT:    node information
  *
  * The new value of page rank is computed in this way:
  *         pagerank' = (1 - damping)/nNodes + damping/nNodes * (pagerankSum)
  * With pagerankSum the sum of the masses received from the ingoing links
  */
-public class PageRankReducer extends Reducer<Text, Node, Text, Text> {
+public class PageRankReducer extends Reducer<Text, Node, Text, Node> {
     private static long nNodes;
-    private static final Text outputValue = new Text();
+    private static final Node outputValue = new Node();
 
     private final double damping = .8;
 
@@ -45,8 +45,7 @@ public class PageRankReducer extends Reducer<Text, Node, Text, Text> {
         if (node == null)
             return;
 
-        node.setPagerank((1-damping)/(double) nNodes + damping * pagerankSum);
-        outputValue.set(node.toString());
+        outputValue.set(node.getOutgoingEdges(), (1-damping)/(double) nNodes + damping * pagerankSum);
         context.write(key, outputValue);
     }
 }

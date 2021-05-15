@@ -12,12 +12,12 @@ import java.util.List;
 
 /**
  * Mapper of the Page Rank process
- * KEY_INPUT:       offset of the line read from the file
- * VALUE_INPUT:     one node (its string representation)
- * KEY_OUTPUT:      title of the node
+ * KEY_INPUT:       title of the page
+ * VALUE_INPUT:     node information
+ * KEY_OUTPUT:      title of the page
  * VALUE_OUTPUT:    node information or mass to send to the node
  */
-public class PageRankMapper extends Mapper<Object, Text, Text, Node> {
+public class PageRankMapper extends Mapper<Text, Text, Text, Node> {
     private static final Text outputKey = new Text();
     private static final Node outputNode = new Node();
 
@@ -38,17 +38,10 @@ public class PageRankMapper extends Mapper<Object, Text, Text, Node> {
          */
 
     @Override
-    protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-        // FORMAT:
-        //      title \t pagerank, outgoing, ...
-        String[] valueSplit = value.toString().split("\t");
-
-        // set the title as the key
-        outputKey.set(valueSplit[0]);
-
+    protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
         // FORMAT:
         //      pagerank, outgoing, ...
-        String[] split = valueSplit[1].trim().split(",");
+        String[] split = value.toString().trim().split(",");
 
         // TAKE THE LIST OF OUTGOING EDGES
         List<Text> list = new ArrayList<>();
@@ -60,14 +53,14 @@ public class PageRankMapper extends Mapper<Object, Text, Text, Node> {
         outputNode.set(new TextArray(outgoingEdges), Double.parseDouble(split[0]));
 
         // Send the node information to the reducer (for preserving the graph structure)
-        context.write(outputKey, outputNode);
+        context.write(key, outputNode);
 
         double massToSend = Double.parseDouble(split[0])/ outgoingEdges.length;
         // Send to each outgoing edge a split of the mass
-        for (Text text : outgoingEdges)
+        for (Text title : outgoingEdges)
         {
             outputNode.set(new TextArray(), massToSend); // We use the Node structure for sending the masses to send
-            context.write(text, outputNode);
+            context.write(title, outputNode);
         }
     }
 }
