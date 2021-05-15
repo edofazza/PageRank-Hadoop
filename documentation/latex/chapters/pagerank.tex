@@ -81,8 +81,7 @@ In this phase we parse the information in the input file taking the information 
 \noindent In \textit{Algorithm 4} only $e_1$ is considered because the title is a unique identifier of the pages, so the list of input values will always consist of a single element. Only one mapper will manage one page.
 
 \subsection{Third Phase: PageRank Estimation}
-In this section, the relaxed pagerank iteration is presented. In the computation, we did not redistribute the probability mass lost by dangling nodes since it was not requested by the project specification, but a special key (i.e., \textbf{DANGLING}) is used for taken into account the total mass lost.
-
+In this section, the relaxed pagerank iteration is presented.
 \noindent The number of iteration is fixed at the start of the execution. We do not converge to a (or a more or less) consistent state, because the presence of dangling nodes will cause importance (i.e., pagerank mass) to leak out.
 
 \begin{algorithm}
@@ -91,13 +90,9 @@ In this section, the relaxed pagerank iteration is presented. In the computation
 						\Procedure{Map}{Key k, FormattedPage p}
 			
 			\State EMIT(p.title, \{0, p.outgoingEdges\})
-			\If{p.outgoingEdges \textbf{is not} empty}
 			\ForAll{outgoingEdge \textbf{in} p.outgoingEdges}
 			\State EMIT(outgoingEdge, $\{\frac{p.pagerank}{p.outgoingEdges.length}, NULL\}$)
 			\EndFor
-			\Else
-			\State EMIT(DANGLING, \{p.pagerank, NULL\})
-			\EndIf
 			\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
@@ -113,12 +108,6 @@ Note: \textit{outgoingEdge} is a title itself.
 			\EndProcedure
 		
 			\Procedure{Reduce}{Title t, Nodes $[n_1, n_2, \dots]$}
-				\If{title = DANGLING}
-					\ForAll {node \textbf{in} nodes}
-						\State $s \gets s + node.pagerank$	
-					\EndFor
-					\State EMIT(t, \{s, NULL\})
-				\Else
 					\State n \textbf{new} Node
 					\ForAll {node \textbf{in} nodes}
 						\If {node.hasOutgoingEdges()}
@@ -129,7 +118,6 @@ Note: \textit{outgoingEdge} is a title itself.
 					\EndFor
 					\State$n.pagerank =  \frac{(1-D)}{N} + D*s$
 					\State EMIT(t, n)
-				\EndIf
 			\EndProcedure
 	\end{algorithmic}
 \end{algorithm}

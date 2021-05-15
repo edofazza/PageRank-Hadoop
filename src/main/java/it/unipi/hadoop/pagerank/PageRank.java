@@ -35,6 +35,8 @@ public class PageRank {
     private static long nNodes;
 
     public static void main(String[] args) throws Exception {
+        long start = System.currentTimeMillis();
+
         Configuration conf = new Configuration();
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 
@@ -56,6 +58,11 @@ public class PageRank {
         boolean finalStatus = sortingJob(conf, "tmp2/iter" + (Integer.parseInt(otherArgs[2])-1), otherArgs[1]);
         removeDirectory(conf, "tmp2");
 
+        // TIME
+        long end = System.currentTimeMillis();
+        end -= start;
+        System.out.println("EXECUTION TIME: " + end + " ms");
+
         if (!finalStatus)
             System.exit(-1);
     }
@@ -70,7 +77,7 @@ public class PageRank {
         job.setMapperClass(CountNodesMapper.class);
         job.setCombinerClass(CountNodesReducer.class);
         job.setReducerClass(CountNodesReducer.class);
-        //no. of reduce tasks equal 1 to enforce global sorting
+
         job.setNumReduceTasks(1);
 
         FileInputFormat.addInputPath(job, new Path(inPath));
