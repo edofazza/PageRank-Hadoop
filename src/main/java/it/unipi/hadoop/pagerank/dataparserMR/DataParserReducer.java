@@ -7,11 +7,11 @@ import org.apache.hadoop.mapreduce.Reducer;
 import java.io.IOException;
 
 /**
- * Reducer used for parsing the documents and retrieves the interesting information
- * KEY_INPUT: title of the document
- * VALUE_INPUT: array of one element containing the TextArray of the outgoing links of this document
- * KEY_OUTPUT: title of the document
- * VALUE_OUTPUT: a text containing the initial page rank value and the array of the outgoing links of this document, divided by comma
+ * Reducer used to store the results calculated with the mappers and calculate the initial page rank value
+ * KEY_INPUT:       title of the page
+ * VALUE_INPUT:     array of one element containing the array of outgoing links of this page
+ * KEY_OUTPUT:      title of the page
+ * VALUE_OUTPUT:    text representation of the node information
  */
 public class DataParserReducer extends Reducer<Text, TextArray, Text, Text> {
     private static double initialPageRank; // 1 / N, with N the number of pages (or nodes in the graph)

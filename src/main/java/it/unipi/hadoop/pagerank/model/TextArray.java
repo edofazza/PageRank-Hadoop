@@ -4,6 +4,9 @@ import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 
+/**
+ * Class that implements an array of Text elements
+ */
 public class TextArray extends ArrayWritable {
 
     public TextArray(Text[] values) {
@@ -11,7 +14,7 @@ public class TextArray extends ArrayWritable {
     }
 
     public TextArray() {
-        super(Text.class);
+        super(Text.class, new Text[0]);
     }
 
     @Override

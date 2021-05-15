@@ -6,6 +6,14 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import java.io.IOException;
 
+
+/**
+ * Mapper for the sorting phase
+ * KEY_INPUT:       offset of the line read from the file
+ * VALUE_INPUT:     one node (its text representation)
+ * KEY_OUTPUT:      page rank of the page
+ * VALUE_OUTPUT:    title of the page
+ */
 public class SortingMapper extends Mapper<Object, Text, DoubleWritable, Text> {
     private DoubleWritable outputKey = new DoubleWritable();
     private Text outputValue = new Text();

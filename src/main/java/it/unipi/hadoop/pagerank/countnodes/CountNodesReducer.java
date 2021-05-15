@@ -6,9 +6,12 @@ import org.apache.hadoop.mapreduce.Reducer;
 import java.io.IOException;
 
 /**
- * This class implements the Reducer that is in charge of counting the number of nodes
+ * This class implements the Reducer that is in charge of counting the number of pages
  * The reducer will obtains one (key, list of values) pair, so there will be only one execution of the reduce function
- * The Key will be 'n', the sum of the list of values will give the number of nodes
+ * KEY_INPUT:       always 'n'
+ * VALUE_INPUT:     list of the values
+ * KEY_OUTPUT:      always 'n'
+ * VALUE_OUTPUT:    sum of the values of the list, so the number of pages
  */
 public class CountNodesReducer extends Reducer<Text, LongWritable, Text, LongWritable> {
     private static final LongWritable outputValue = new LongWritable();

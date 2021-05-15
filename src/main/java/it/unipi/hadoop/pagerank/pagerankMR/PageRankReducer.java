@@ -6,6 +6,17 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 
+/**
+ * Reducer of the Page Rank process
+ * KEY_INPUT:       title of the node
+ * VALUE_INPUT:     node information
+ * KEY_OUTPUT:      title of the node
+ * VALUE_OUTPUT:    text representation of the node information
+ *
+ * The new value of page rank is computed in this way:
+ *         pagerank' = (1 - damping)/nNodes + damping/nNodes * (pagerankSum)
+ * With pagerankSum the sum of the masses received from the ingoing links
+ */
 public class PageRankReducer extends Reducer<Text, Node, Text, Text> {
     private static long nNodes;
     private static final Text outputValue = new Text();
@@ -14,23 +25,18 @@ public class PageRankReducer extends Reducer<Text, Node, Text, Text> {
 
     @Override
     protected void setup(Context context) {
-        this.nNodes = Long.parseLong(context.getConfiguration().get("nNodes"));
+        nNodes = Long.parseLong(context.getConfiguration().get("nNodes"));
     }
 
-    /*
-       pagerank' = (1 - damping)/nNodes + damping/nNodes * (danglingMass + pagerankSum)
-     */
     @Override
     protected void reduce(Text key, Iterable<Node> values, Context context) throws IOException, InterruptedException {
         double pagerankSum = 0;
         Node node = null;
 
-        /*
-            Check if it is a node or not, if it is a node I get the outgoings links,
-            otherwise I compute the ingoing mass
-         */
         for (Node value: values) {
-            if (value.getOutgoingEdges().get().length != 0 && value.getOutgoingEdges() != null)
+            // Check if it is a node or not, if it is a node I get the node structure,
+            // otherwise I compute the ingoing mass
+            if (value.getOutgoingEdges() != null && value.getOutgoingEdges().get().length != 0)
                 node = Node.copy(value);
             else
                 pagerankSum += value.getPagerank();
@@ -39,16 +45,8 @@ public class PageRankReducer extends Reducer<Text, Node, Text, Text> {
         if (node == null)
             return;
 
-        if (node.getOutgoingEdges().get().length == 0) {// DANGLING
-            outputValue.set(Double.toString(pagerankSum));
-            context.write(key, outputValue);
-        } else {
-            node.setPagerank(
-                    //(1-damping)/(double) nNodes + damping * (danglingsMass + pagerankSum)
-                    (1-damping)/(double) nNodes + damping * pagerankSum
-            );
-            outputValue.set(node.toString());
-            context.write(key, outputValue);
-        }
+        node.setPagerank((1-damping)/(double) nNodes + damping * pagerankSum);
+        outputValue.set(node.toString());
+        context.write(key, outputValue);
     }
 }

@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Mapper used for parsing the documents and retrieves the interesting information
- * KEY_INPUT: offset of the line readed by the file
- * VALUE_INPUT: one line of the document
- * KEY_OUTPUT: title of the document
- * VALUE_OUTPUT: array of the outgoing links of this document
+ * Mapper used for parsing the pages and retrieves the interesting information
+ * KEY_INPUT:       offset of the line read from the file
+ * VALUE_INPUT:     one line of the dataset, so one page
+ * KEY_OUTPUT:      title of the page
+ * VALUE_OUTPUT:    array of the outgoing links of this page
  */
 public class DataParserMapper extends Mapper<Object, Text, Text, TextArray> {
     // reuse the writable objects
@@ -22,45 +22,51 @@ public class DataParserMapper extends Mapper<Object, Text, Text, TextArray> {
 
     @Override
     protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-        String title = getTitleFromDocument(value.toString());
+        String title = getTitleFromPage(value.toString());
         outputKey.set(title);
-        outputValue.set(getOutgoingLinksFromDocument(getTextFromDocument(value.toString())));
-        context.write(outputKey, new TextArray(getOutgoingLinksFromDocument(getTextFromDocument(value.toString()))));
+        outputValue.set(getOutgoingLinksFromPage(
+                getTextFromPage(value.toString()))
+        );
+        context.write(outputKey, new TextArray(
+                getOutgoingLinksFromPage(
+                        getTextFromPage(value.toString()))
+                )
+        );
     }
 
     /**
-     * Function that retrieves the title of the document
-     * @param document  Document in input to the map function
-     * @return          Title of the document
+     * Function that retrieves the title of the page
+     * @param page  Page in input to the map function
+     * @return          Title of the page
      */
-    private String getTitleFromDocument (String document)
+    private String getTitleFromPage (String page)
     {
         String initialString = "<title>";
         // document.indexOf() returns the index of the first character
-        return document.substring(
-                document.indexOf(initialString) + initialString.length(), // I need to sum the length of the string
-                document.indexOf("</title>"));
+        return page.substring(
+                page.indexOf(initialString) + initialString.length(), // I need to sum the length of the string
+                page.indexOf("</title>"));
     }
 
     /**
-     * Function that retrieves the Text field of the document, in which there are the links
-     * @param document      Document to parse
+     * Function that retrieves the Text field of the page, in which there are the links
+     * @param page      page to parse
      * @return              The text field
      */
-    private String getTextFromDocument (String document)
+    private String getTextFromPage (String page)
     {
         String initialString = "<text xml:space=\"preserve\">";
-        return document.substring(
-                document.indexOf(initialString) + initialString.length(),
-                document.indexOf("</text>"));
+        return page.substring(
+                page.indexOf(initialString) + initialString.length(),
+                page.indexOf("</text>"));
     }
 
     /**
-     * Function that retrieves the outgoing links from the text field of the document
+     * Function that retrieves the outgoing links from the text field of the page
      * @param text      Text field to analyze
      * @return          The list of outgoing links
      */
-    private Text[] getOutgoingLinksFromDocument (String text)
+    private Text[] getOutgoingLinksFromPage (String text)
     {
         List<Text> outgoingLinks = new ArrayList<>();
         int i=0;

@@ -6,6 +6,13 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 
+/**
+ * Reducer for the sorting phase
+ * KEY_INPUT:       Page rank value
+ * VALUE_INPUT:     Titles of all the pages that have this value of pagerank
+ * KEY_OUTPUT:      Title of the page
+ * VALUE_OUTPUT:    Page rank value of the page
+ */
 public class SortingReducer extends Reducer<DoubleWritable, Text, Text, Text> {
     private Text outputValue = new Text();
 

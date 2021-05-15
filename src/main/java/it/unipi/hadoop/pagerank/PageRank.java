@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class PageRank {
-    private static final int HOW_MANY_REDUCER = 3;
+    private static final int HOW_MANY_REDUCER = 3; // we take advantage of all the workers available
     private static long nNodes;
 
     public static void main(String[] args) throws Exception {
@@ -49,7 +49,12 @@ public class PageRank {
 
         if (!pagerankJob(conf, "tmp1", "tmp2", Integer.parseInt(otherArgs[2])))
             System.exit(-1);
-        System.exit(sortingJob(conf, "tmp2/iter" + (Integer.parseInt(otherArgs[2])-1), otherArgs[1]) ? 0 : 1);
+
+        boolean finalStatus = sortingJob(conf, "tmp2/iter" + (Integer.parseInt(otherArgs[2])-1), otherArgs[1]);
+        removeDirectory(conf, "tmp2");
+
+        if (!finalStatus)
+            System.exit(-1);
     }
 
     private static boolean countNodesJob (Configuration conf, String inPath, String outPath) throws Exception {
@@ -116,7 +121,6 @@ public class PageRank {
             job.setMapOutputValueClass(Node.class);
 
             job.setMapperClass(PageRankMapper.class);
-            //job.setCombinerClass(PageRankCombiner.class);
             job.setReducerClass(PageRankReducer.class);
 
             job.setNumReduceTasks(HOW_MANY_REDUCER);
@@ -138,8 +142,8 @@ public class PageRank {
 
             result = job.waitForCompletion(true);
 
-           // if (i == 0)
-              //  removeDirectory(conf, inPath);
+           if (i == 0)
+               removeDirectory(conf, inPath);
             if (i > 0)
                 removeDirectory(conf, outPath + "/iter" + (i-1));
         }
@@ -192,11 +196,11 @@ public class PageRank {
                     break;
                 }
 
-                // be sure to read the next line otherwise you'll get an infinite loop
+                // be sure to read the next line otherwise we get an infinite loop
                 line = br.readLine();
             }
         } finally {
-            // you should close out the BufferedReader
+            // close out the BufferedReader
             br.close();
         }
 

@@ -8,10 +8,13 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
 
+/**
+ * This class stores all the status information of a node in the graph
+ * It implements WritableComparable because it mut be serializable
+ */
 public class Node implements WritableComparable<Node> {
     private double pagerank;
     private TextArray outgoingEdges;
-
 
     //********************************************
     //              CONSTRUCTORS
