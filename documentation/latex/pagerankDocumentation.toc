@@ -12,5 +12,3 @@
 \contentsline {subsection}{\numberline {2.4}Third Phase: PageRank Estimation}{5}{subsection.2.4}%
 \contentsline {subsection}{\numberline {2.5}Forth Phase: Sorting}{5}{subsection.2.5}%
 \contentsline {subsection}{\numberline {2.6}Performance}{5}{subsection.2.6}%
-\contentsline {section}{\numberline {3}Spark Implementation in Java}{7}{section.3}%
-\contentsline {section}{\numberline {4}Spark Implementation in Python}{8}{section.4}%

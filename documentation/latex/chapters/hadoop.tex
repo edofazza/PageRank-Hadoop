@@ -18,7 +18,7 @@ Since the previous phase constructs multiple outputs, the sorting phase has to t
 \subsection{Performance}
 For measuring the performance we considered three files with a different number of nodes:
 \begin{itemize}
-	\item \textbf{wiki-micro.txt}: number of nodes 2427.
+	\item \textbf{wiki-micro.txt}: number of nodes 2427. Most of the nodes points to sites that are not present in the initial set.
 	\item \textbf{dataset5.txt}: number of nodes 5000. This dataset is synthetic dataset created using the same structure of \textit{wiki-micro.txt}. Each node has a random value of outgoing edges between 0 and 10.
 	\item \textbf{dataset10.txt}: number of nodes 10000. This dataset is synthetic dataset created using the same structure of \textit{wiki-micro.txt}. Each node has a random value of outgoing edges between 0 and 10.
 \end{itemize}
@@ -31,9 +31,9 @@ and we test them over different numbers of iteration: 5, 10, 15.
 \hline\hline
 File & N Iter 5 & N Iter 10 & N Iter 15 \\ [0.7ex] % inserts table %heading
 \hline
-wiki-micro.txt&185557&3181196&432149 \\
-dataset5.txt&-&-&- \\
-dataset10.txt& - & - & - \\ [1ex]
+wiki-micro.txt&184417&314290&436651\\
+dataset5.txt&186320&310445&467191 \\
+dataset10.txt&206945&339101&455945 \\ [1ex]
 \hline
 \end{tabular}
 \label{table:nonlin}

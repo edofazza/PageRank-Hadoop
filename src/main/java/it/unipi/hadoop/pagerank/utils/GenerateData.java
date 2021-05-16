@@ -27,6 +27,21 @@ public class GenerateData {
             e.printStackTrace();
         }
 
+        while (sites.size() < 10000) {
+            int index = (int) Math.round(Math.random() * sites.size()) - 1;
+            if (index < 0)
+                index = 0;
+            String part1 = sites.get(index);
+
+           index = (int) Math.round(Math.random() * sites.size()) - 1;
+            if (index < 0)
+                index = 0;
+            String newSite = part1 + sites.get(index);
+
+            if (!sites.contains(newSite))
+                sites.add(newSite);
+        }
+
         // GENERATE RECORDS
         /*
                <title>    </title>
@@ -35,14 +50,17 @@ public class GenerateData {
         for (String site: sites) {
             String output = "<title>" + site + "</title><text>";
 
-            int limit = (int) Math.round(Math.random()*5);
+            int limit = (int) Math.round(Math.random()*10);
             for (int i = 0; i < limit; i++) {
                 output += "[[";
 
                 // CHOOSE RANDOM NEIGHBOR
                 String tmp;
                 do {
-                    tmp = sites.get((int) Math.round(Math.random() * sites.size()));
+                    int index = (int) Math.round(Math.random() * sites.size()) - 1;
+                    if (index < 0)
+                        index = 0;
+                    tmp = sites.get(index);
                 } while(site.equals(tmp));
 
                 output += tmp + "]]";
@@ -51,7 +69,7 @@ public class GenerateData {
             output += "</text>\n";
             try {
                 //Files.write(Paths.get("cipherCodeRepo/cipherFavorite/cipherUser"+ nFile + ".txt"), query.getBytes(), StandardOpenOption.APPEND);
-                Files.write(Paths.get("data/dataset.txt"), output.getBytes(), StandardOpenOption.APPEND);
+                Files.write(Paths.get("data/dataset10.txt"), output.getBytes(), StandardOpenOption.APPEND);
             }catch (IOException e) {
                 e.printStackTrace();
             }
