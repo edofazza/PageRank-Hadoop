@@ -18,7 +18,6 @@ import java.util.List;
  * VALUE_OUTPUT:    node information or mass to send to the node
  */
 public class PageRankMapper extends Mapper<Text, Text, Text, Node> {
-    private static final Text outputKey = new Text();
     private static final Node outputNode = new Node();
 
      /*
@@ -39,25 +38,15 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Node> {
 
     @Override
     protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
-        // FORMAT:
-        //      pagerank, outgoing, ...
-        String[] split = value.toString().trim().split(",");
-
-        // TAKE THE LIST OF OUTGOING EDGES
-        List<Text> list = new ArrayList<>();
-        for (int i = 1; i < split.length; i++) // i = 1 because we skip the pagerank value (see FORMAT)
-            list.add(new Text(split[i]));
-
-        Text[] outgoingEdges = list.toArray(new Text[0]);
-
-        outputNode.set(new TextArray(outgoingEdges), Double.parseDouble(split[0]));
+        outputNode.set(value.toString());
 
         // Send the node information to the reducer (for preserving the graph structure)
         context.write(key, outputNode);
 
-        double massToSend = Double.parseDouble(split[0])/ outgoingEdges.length;
+        double massToSend = outputNode.getPagerank() / outputNode.getOutgoingEdges().get().length;
+
         // Send to each outgoing edge a split of the mass
-        for (Text title : outgoingEdges)
+        for (Text title : outputNode.getOutgoingEdges().get())
         {
             outputNode.set(new TextArray(), massToSend); // We use the Node structure for sending the masses to send
             context.write(title, outputNode);

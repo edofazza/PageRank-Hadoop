@@ -6,7 +6,9 @@ import org.apache.hadoop.io.WritableComparable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class stores all the status information of a node in the graph
@@ -23,12 +25,20 @@ public class Node implements WritableComparable<Node> {
         outgoingEdges = null;
     }
 
-    public Node(String outEstring) {
-        set(stringToTextArray(outEstring), 0);
-    }
+    public void set (String representation)
+    {
+        // FORMAT:
+        //      pagerank, outgoing, ...
+        String[] split = representation.trim().split(",");
 
-    public Node(TextArray outElist) {
-        set(outElist, 0);
+        // TAKE THE LIST OF OUTGOING EDGES
+        List<Text> list = new ArrayList<>();
+        for (int i = 1; i < split.length; i++) // i = 1 because we skip the pagerank value (see FORMAT)
+            list.add(new Text(split[i]));
+
+        Text[] outgoingEdges = list.toArray(new Text[0]);
+        this.outgoingEdges = new TextArray(outgoingEdges);
+        this.pagerank = Double.parseDouble(split[0]);
     }
 
     public Node(TextArray outgoingEdges, double pagerank) {
@@ -61,11 +71,6 @@ public class Node implements WritableComparable<Node> {
 
     public static Node copy(final Node node) {
         return new Node(node.getOutgoingEdges(), node.pagerank);
-    }
-
-    public TextArray stringToTextArray(String edges) {
-        String[] edgeArray = edges.trim().split(",");
-        return new TextArray(Arrays.copyOf(edgeArray, edgeArray.length, Text[].class));
     }
 
     @Override
