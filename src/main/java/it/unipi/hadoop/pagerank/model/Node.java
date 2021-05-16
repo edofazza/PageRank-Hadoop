@@ -25,22 +25,6 @@ public class Node implements WritableComparable<Node> {
         outgoingEdges = null;
     }
 
-    public void set (String representation)
-    {
-        // FORMAT:
-        //      pagerank, outgoing, ...
-        String[] split = representation.trim().split(",");
-
-        // TAKE THE LIST OF OUTGOING EDGES
-        List<Text> list = new ArrayList<>();
-        for (int i = 1; i < split.length; i++) // i = 1 because we skip the pagerank value (see FORMAT)
-            list.add(new Text(split[i]));
-
-        Text[] outgoingEdges = list.toArray(new Text[0]);
-        this.outgoingEdges = new TextArray(outgoingEdges);
-        this.pagerank = Double.parseDouble(split[0]);
-    }
-
     public Node(TextArray outgoingEdges, double pagerank) {
         set(outgoingEdges, pagerank);
     }
@@ -63,6 +47,22 @@ public class Node implements WritableComparable<Node> {
     public void set(final TextArray outgoingEdges, final double pagerank) {
         this.outgoingEdges = outgoingEdges;
         this.pagerank = pagerank;
+    }
+
+    public void set (String representation)
+    {
+        // FORMAT:
+        //      pagerank, outgoing, ...
+        String[] split = representation.trim().split(",");
+
+        // TAKE THE LIST OF OUTGOING EDGES
+        List<Text> list = new ArrayList<>();
+        for (int i = 1; i < split.length; i++) // i = 1 because we skip the pagerank value (see FORMAT)
+            list.add(new Text(split[i]));
+
+        Text[] outgoingEdges = list.toArray(new Text[0]);
+        this.outgoingEdges = new TextArray(outgoingEdges);
+        this.pagerank = Double.parseDouble(split[0]);
     }
 
     public void setPagerank(final double pagerank) {
