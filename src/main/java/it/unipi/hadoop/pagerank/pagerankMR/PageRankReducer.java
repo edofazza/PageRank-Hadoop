@@ -14,7 +14,7 @@ import java.io.IOException;
  * VALUE_OUTPUT:    node information
  *
  * The new value of page rank is computed in this way:
- *         pagerank' = (1 - damping)/nNodes + damping/nNodes * (pagerankSum)
+ *         pagerank' = (1 - damping)/nNodes + damping * (pagerankSum)
  * With pagerankSum the sum of the masses received from the ingoing links
  */
 public class PageRankReducer extends Reducer<Text, Node, Text, Node> {
@@ -42,6 +42,8 @@ public class PageRankReducer extends Reducer<Text, Node, Text, Node> {
                 pagerankSum += value.getPagerank();
         }
 
+        // If we have received only mass without the Node structure means that this is not a node
+        // The mass received is lost
         if (node == null)
             return;
 

@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * Mapper for the sorting phase
  * KEY_INPUT:       title of the page
- * VALUE_INPUT:     node information (Text representation)
+ * VALUE_INPUT:     node information
  * KEY_OUTPUT:      page rank of the page
  * VALUE_OUTPUT:    title of the page
  */

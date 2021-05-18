@@ -1,9 +1,8 @@
 package it.unipi.hadoop.pagerank;
 
-import it.unipi.hadoop.pagerank.countnodes.CountNodesMapper;
-import it.unipi.hadoop.pagerank.countnodes.CountNodesReducer;
 import it.unipi.hadoop.pagerank.dataparserMR.DataParserMapper;
 import it.unipi.hadoop.pagerank.dataparserMR.DataParserReducer;
+import it.unipi.hadoop.pagerank.dataparserMR.ParserPartitioner;
 import it.unipi.hadoop.pagerank.model.Node;
 import it.unipi.hadoop.pagerank.model.TextArray;
 import it.unipi.hadoop.pagerank.pagerankMR.PageRankMapper;
@@ -14,10 +13,7 @@ import it.unipi.hadoop.pagerank.sortingMR.SortingReducer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.KeyValueTextInputFormat;
@@ -32,7 +28,6 @@ import java.io.InputStreamReader;
 
 public class PageRank {
     private static final int HOW_MANY_REDUCER = 3; // we take advantage of all the workers available, when it is possible
-    private static long nNodes;
 
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
@@ -45,17 +40,13 @@ public class PageRank {
             System.exit(-1);
         }
 
-        removeDirectory(conf, otherArgs[1]);
-        if (!countNodesJob(conf, otherArgs[0], "tmp0"))
+        if (!dataParserJob(conf, otherArgs[0], "tmp1"))
             System.exit(-1);
-        if (!dataParserJob(conf, otherArgs[0], "tmp1", "tmp0/part-r-00000"))
+        if (!pagerankJob(conf, "tmp1", "tmp2", Integer.parseInt(otherArgs[2]), "tmp1/part-r-00000"))
             System.exit(-1);
-        removeDirectory(conf, "tmp0");
+        removeDirectory(conf, otherArgs[1]); // remove output folder
 
-        if (!pagerankJob(conf, "tmp1", "tmp2", Integer.parseInt(otherArgs[2])))
-            System.exit(-1);
-
-        boolean finalStatus = sortingJob(conf, "tmp2/iter" + (Integer.parseInt(otherArgs[2])-1), otherArgs[1]);
+        boolean finalStatus = sortingJob(conf, "tmp2/iter" + (Integer.parseInt(otherArgs[2])), otherArgs[1]);
         removeDirectory(conf, "tmp2");
 
         // TIME
@@ -67,31 +58,7 @@ public class PageRank {
             System.exit(-1);
     }
 
-    private static boolean countNodesJob (Configuration conf, String inPath, String outPath) throws Exception {
-        Job job  = Job.getInstance(conf, " countNodes");
-        job.setJarByClass(PageRank.class);
-
-        job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(LongWritable.class);
-
-        job.setMapperClass(CountNodesMapper.class);
-        job.setCombinerClass(CountNodesReducer.class);
-        job.setReducerClass(CountNodesReducer.class);
-
-        job.setNumReduceTasks(1);
-
-        FileInputFormat.addInputPath(job, new Path(inPath));
-        FileOutputFormat.setOutputPath(job, new Path(outPath));
-        job.setInputFormatClass(TextInputFormat.class);
-        job.setOutputFormatClass(TextOutputFormat.class);
-
-        return job.waitForCompletion(true);
-    }
-
-    private static boolean dataParserJob(Configuration conf, String inPath, String outPath, String inDataPath) throws Exception {
-        nNodes = readNumber(conf, inDataPath, "n");
-        conf.setLong("nNodes", nNodes);
-
+    private static boolean dataParserJob(Configuration conf, String inPath, String outPath) throws Exception {
         Job job = Job.getInstance(conf, "pageParserJob");
         job.setJarByClass(PageRank.class);
 
@@ -103,8 +70,9 @@ public class PageRank {
 
         job.setMapperClass(DataParserMapper.class);
         job.setReducerClass(DataParserReducer.class);
+        job.setPartitionerClass(ParserPartitioner.class);
 
-        // I can use all the machines for running the reduce task, i will obtain 3 different output files
+        // I can use all the machines for running the reduce task, i will obtain different output files
         job.setNumReduceTasks(HOW_MANY_REDUCER);
 
         FileInputFormat.addInputPath(job,  new Path(inPath));
@@ -115,12 +83,13 @@ public class PageRank {
         return job.waitForCompletion(true);
     }
 
-    private static boolean pagerankJob(Configuration conf, String inPath, String outPath, int nIter) throws Exception {
+    private static boolean pagerankJob(Configuration conf, String inPath, String outPath, int nIter, String inDataPath) throws Exception {
+        long nNodes = readNumber(conf, inDataPath, "");
         conf.setLong("nNodes", nNodes);
         boolean result = false;
 
         for (int i = 0; i < nIter; i++) {
-            System.out.println("\n\n\n\n\nITER NUMBER " + i);
+            System.out.println("\n\n\n\n\nITER NUMBER " + (i+1));
             Job job = Job.getInstance(conf, "pageRank");
             job.setJarByClass(PageRank.class);
 
@@ -137,14 +106,17 @@ public class PageRank {
 
             // CHECK IF STEP 1
             if (i == 0) {
-                FileInputFormat.setInputPaths(job, new Path(inPath + "/part-r-00000"), new Path(inPath + "/part-r-00001"), new Path(inPath + "/part-r-00002"));
-                FileOutputFormat.setOutputPath(job, new Path(outPath + "/iter" + i));
+                FileInputFormat.setInputPaths(job,
+                        new Path(inPath + "/part-r-00000"),
+                        new Path(inPath + "/part-r-00001"),
+                        new Path(inPath + "/part-r-00002"));
+                FileOutputFormat.setOutputPath(job, new Path(outPath + "/iter" + (i+1)));
             } else {
                 FileInputFormat.setInputPaths(job,
-                        new Path(outPath + "/iter" + (i-1) + "/part-r-00000"),
-                        new Path(outPath + "/iter" + (i-1) + "/part-r-00001"),
-                        new Path(outPath + "/iter" + (i-1) + "/part-r-00002"));
-                FileOutputFormat.setOutputPath(job, new Path(outPath + "/iter" + i));
+                        new Path(outPath + "/iter" + (i) + "/part-r-00000"),
+                        new Path(outPath + "/iter" + (i) + "/part-r-00001"),
+                        new Path(outPath + "/iter" + (i) + "/part-r-00002"));
+                FileOutputFormat.setOutputPath(job, new Path(outPath + "/iter" + (i+1)));
             }
 
             job.setInputFormatClass(KeyValueTextInputFormat.class);
@@ -152,10 +124,10 @@ public class PageRank {
 
             result = job.waitForCompletion(true);
 
-           if (i == 0)
-               removeDirectory(conf, inPath);
+            if (i == 0)
+                removeDirectory(conf, inPath);
             if (i > 0)
-                removeDirectory(conf, outPath + "/iter" + (i-1));
+                removeDirectory(conf, outPath + "/iter" + i);
         }
         return result;
     }
