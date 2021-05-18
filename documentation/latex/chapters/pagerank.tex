@@ -2,9 +2,8 @@
 
 \subsection{Introduction}
 In this section a description of the MapReduce implementation of \textit{Page Rank} is given.
-The algorithm is carried out in \textbf{four distinct steps}:
+The algorithm is carried out in \textbf{three distinct steps}:
 \begin{enumerate}
-	\item \textit{Nodes counting} phase
 	\item \textit{Graph Construction} phase
 	\item \textit{Page Rank Computation} phase
 	\item \textit{Sorting} phase
@@ -14,38 +13,10 @@ The algorithm is carried out in \textbf{four distinct steps}:
 \noindent We have decided to represent the structure of the graph through adjacency lists, so each node (that represents a page) will keep the list of outgoing edges as status information, as well as its ranking.
 
 
+\subsection{First Phase: Graph Construction}
+In this phase we parse the information in the input file taking the information that interests us, i.e. the title of the page and the outgoing edges. In addition to this, we take advantage of this phase to also perform the count of the graph nodes.
 
-\subsection{First Phase: Nodes Counting}
-To compute PageRank the total number of nodes is required. Considering that the number of nodes is unknown at the beginning –and may be huge–, this is assessed by using a MapReduce approach for optimization reasons.
-
-
-\begin{algorithm}[H]
-	\caption{Nodes Counter Mapper}\label{Mapper}
-		\begin{algorithmic}[1]
-			\Procedure{Map}{PageId id, Page p}
-					\If {p is not empty}
-						\State EMIT(uniqueKey, 1) 
-					\EndIf
-			\EndProcedure
-	\end{algorithmic}
-\end{algorithm}
-
-
-\begin{algorithm}[H]
-	\caption{Nodes Counter Reducer}\label{Reducer}
-		\begin{algorithmic}[1]
-			\Procedure{Reduce}{Key k, Values $[v_1, v_2, \dots]$}
-					\ForAll {value \textbf{in} values}
-						\State $sum \gets sum + value$
-					\EndFor
-					\State EMIT(N, sum)
-			\EndProcedure
-	\end{algorithmic}
-\end{algorithm}
-
-
-\subsection{Second Phase: Graph Construction}
-In this phase we parse the information in the input file taking the information that interests us, i.e. the title of the page and the outgoing edges. Also, to each page, we provide the initial PageRank thanks to the already calculated total number of nodes. 
+ALGORITMI DA RISCRIVERE ALLA FINE!!!
 
 \begin{algorithm}[H]
 	\caption{Graph Construction Mapper}\label{Mapper}
@@ -80,8 +51,8 @@ In this phase we parse the information in the input file taking the information 
 
 \noindent In \textit{Algorithm 4} only $e_1$ is considered because the title is a unique identifier of the pages, so the list of input values will always consist of a single element. Only one mapper will manage one page.
 
-\subsection{Third Phase: PageRank Estimation}
-In this section, the relaxed pagerank iteration is presented.
+\subsection{Second Phase: PageRank Estimation}
+In this section, the pagerank iteration is presented.
 \noindent The number of iteration is fixed at the start of the execution. We do not converge to a (or a more or less) consistent state, because the presence of dangling nodes will cause importance (i.e., pagerank mass) to leak out.
 
 \begin{algorithm}
@@ -124,7 +95,7 @@ Note: \textit{outgoingEdge} is a title itself.
 
 
 
-\subsection{Fourth Phase: Sorting}
+\subsection{Third Phase: Sorting}
 The final step is sorting the webpages by decreasing rank, this is done making advantage of the sorting mechanism of MapReduce.
 
 \begin{algorithm}[H]

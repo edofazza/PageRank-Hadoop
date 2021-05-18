@@ -1,19 +1,22 @@
 \section{Hadoop Implementation}
 \subsection{Introduction}
-In this section is briefly described some features done in the code for speeding up the execution of the code introduced in the pseudocode presented in the previous chapter. After that, the performance evaluation of the computation is reported.
+In this section is briefly described how we have implemented in Hadoop the pseudocode presented in the previous chapter. After that, the performance evaluation of the computation is reported.
 
+\subsection{First Phase: Graph construction}
+Parsing is a job that doesn't need to create a conglomerate value, but it creates records which, each of them, is treated as a standalone piece of information. We decide to use three reducers since we have three working nodes.
 
-\subsection{First Phase: Nodes Counting}
-The counting is done making use of a combiner with the same code of the reducer, this helps up to speed up the processing at the reducer with a simple sum of three values (i.e., equal to the number of mappers used). The value computed is stored in a temporary file that we will erased after being read and stored inside the \textit{Configuration} object.
+\noindent Initially we had thought of inserting an initial step dedicated exclusively to the node count, but later we came up with a better solution, complicating the parsing phase. In the section on performance the differences between the two approaches will be shown, showing the improvement obtained.
 
-\subsection{Second Phase: Graph construction}
-Parsing is a job that doesn't not need to create a conglomerate value, but it creates records which, each of them, is treated as a standalone piece of information, thus using multiple reducers is possible. We decide to use three reducers since we have three working nodes.
+\noindent First we consider the Mapper, in which each record is parsed, looking for the title and all the outgoing links. So for each record we are going to emit a pair \textbf{(title, outgoing edges)}. In addition to this we must also count the number of nodes, to do this we use an \textbf{In-Mapper Combiner}, a global counter inside the Mapper. It will be initialized to 0 in setup, and incremented at each execution of the map function; during the cleanup we will transmit a single cumulative value for that Mapper, transmitting the pair \textbf{("", N)}, with N the value of the counter. As a key we use the empty string "", which cannot belong to any title and which is always placed first in lexicographic order.
+Since we send two different information between Mapper and Reducer, we have decided to implement our own partitioner, to always send partial counters to Reducer 0 and therefore be sure to have this value in the file part-r-00000.
+As for the reducer, it takes care of adding the partial values of the counters to obtain N, the number of nodes; in addition it will get the title and outgoing links values of each record. All this information will be saved in the filesystem, to be processed in the next step.
 
-\subsection{Third Phase: PageRank Estimation}
+\subsection{Second Phase: PageRank Estimation}
+Since the previous phase constructs multiple outputs, this phase has to take multiple inputs
 As in the \textit{Graph construction} phase multiple reducers are used for accelerating the computation. Thus, from the first iteration to the last one this MapReduce computation takes multiple inputs and produces multiple outputs.
 
-\subsection{Forth Phase: Sorting}
-Since the previous phase constructs multiple outputs, the sorting phase has to take multiple inputs. Here a single reducer is used in order to take advantage of the automatic sorting done over the keys by Hadoop. Keys are in this case the pagerank value of each page, and are passed by the mapper to the reducer as \textbf{DoubleWritable} objects.
+\subsection{Third Phase: Sorting}
+Since the previous phase constructs multiple outputs, also this phase has to take multiple inputs. Here a single reducer is used in order to take advantage of the automatic sorting done over the keys by Hadoop. Keys are in this case the pagerank value of each page, and are passed by the mapper to the reducer as \textbf{DoubleWritable} objects.
 
 \subsection{Performance}
 For measuring the performance we considered three files with a different number of nodes:
