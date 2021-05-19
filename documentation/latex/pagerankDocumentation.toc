@@ -7,6 +7,6 @@
 \contentsline {section}{\numberline {2}Hadoop Implementation}{4}{section.2}%
 \contentsline {subsection}{\numberline {2.1}Introduction}{4}{subsection.2.1}%
 \contentsline {subsection}{\numberline {2.2}First Phase: Graph construction}{4}{subsection.2.2}%
-\contentsline {subsection}{\numberline {2.3}Second Phase: PageRank Estimation}{4}{subsection.2.3}%
-\contentsline {subsection}{\numberline {2.4}Third Phase: Sorting}{4}{subsection.2.4}%
-\contentsline {subsection}{\numberline {2.5}Performance}{4}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.3}Second Phase: PageRank Estimation}{5}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Third Phase: Sorting}{5}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Performance}{5}{subsection.2.5}%

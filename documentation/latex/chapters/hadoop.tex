@@ -8,15 +8,22 @@ Parsing is a job that doesn't need to create a conglomerate value, but it create
 \noindent Initially we had thought of inserting an initial step dedicated exclusively to the node count, but later we came up with a better solution, complicating the parsing phase. In the section on performance the differences between the two approaches will be shown, showing the improvement obtained.
 
 \noindent First we consider the Mapper, in which each record is parsed, looking for the title and all the outgoing links. So for each record we are going to emit a pair \textbf{(title, outgoing edges)}. In addition to this we must also count the number of nodes, to do this we use an \textbf{In-Mapper Combiner}, a global counter inside the Mapper. It will be initialized to 0 in setup, and incremented at each execution of the map function; during the cleanup we will transmit a single cumulative value for that Mapper, transmitting the pair \textbf{("", N)}, with N the value of the counter. As a key we use the empty string "", which cannot belong to any title and which is always placed first in lexicographic order.
-Since we send two different information between Mapper and Reducer, we have decided to implement our own partitioner, to always send partial counters to Reducer 0 and therefore be sure to have this value in the file part-r-00000.
-As for the reducer, it takes care of adding the partial values of the counters to obtain N, the number of nodes; in addition it will get the title and outgoing links values of each record. All this information will be saved in the filesystem, to be processed in the next step.
+Since we send two different information between Mapper and Reducer, we have decided to implement our own \textbf{partitioner}, to always send partial counters to Reducer 0 and therefore be sure to have this value in the file part-r-00000. All other keys will be split into the other reducers, using an hash function, like the default behavior.
+As for the reducer, it takes care of adding the partial values of the counters to obtain N, the number of nodes; in addition it will get the title and outgoing links values of each record. All this information will be saved in the filesystem, to be processed in the next step. The next step will take in input all the output file containing the Node information. All this process has been schematized in \ref{fig:parsingPhase}
+
+
+\begin{figure}
+	\includegraphics[width=\textwidth]{img/ParserSchema.png}
+	\caption{Parsing phase}
+	\label{fig:parsingPhase}     
+\end{figure}
 
 \subsection{Second Phase: PageRank Estimation}
 Since the previous phase constructs multiple outputs, this phase has to take multiple inputs
 As in the \textit{Graph construction} phase multiple reducers are used for accelerating the computation. Thus, from the first iteration to the last one this MapReduce computation takes multiple inputs and produces multiple outputs.
 
 \subsection{Third Phase: Sorting}
-Since the previous phase constructs multiple outputs, also this phase has to take multiple inputs. Here a single reducer is used in order to take advantage of the automatic sorting done over the keys by Hadoop. Keys are in this case the pagerank value of each page, and are passed by the mapper to the reducer as \textbf{DoubleWritable} objects.
+Since the previous phase constructs multiple outputs, also this phase has to take multiple inputs. Here a single reducer is used in order to take advantage of the automatic sorting done over the keys by Hadoop. Keys are in this case the pagerank value of each page, and are passed by the mapper to the reducer as \textbf{DoubleWritable} objects. We have implemented a \textbf{WritableComparator} for getting the descending order.
 
 \subsection{Performance}
 For measuring the performance we considered three files with a different number of nodes:
@@ -27,7 +34,7 @@ For measuring the performance we considered three files with a different number 
 \end{itemize}
 and we test them over different numbers of iteration: 5, 10, 15.
 
-In order to prove the performance gain in \textit{In-Mapper Combiner} instead of counting the nodes in a MapReduce, we provide the result of both the approchies.
+In order to prove the performance gain in \textit{In-Mapper Combiner} instead of counting the nodes in a MapReduce, we provide the result of both the approches.
 
 \begin{table}[H]
 \caption{Performance with MapReduce Node Counter}
