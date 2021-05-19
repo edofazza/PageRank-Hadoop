@@ -48,9 +48,6 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Node> {
 
     @Override
     protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
-        if (key.toString().equals("")) // do not consider the value when key equal to ""
-            return;
-
         outputNode.set(value.toString());
 
         if (outputNode.getPagerank() == -1) // if it is the first time for this record

@@ -107,7 +107,6 @@ public class PageRank {
             // CHECK IF STEP 1
             if (i == 0) {
                 FileInputFormat.setInputPaths(job,
-                        new Path(inPath + "/part-r-00000"),
                         new Path(inPath + "/part-r-00001"),
                         new Path(inPath + "/part-r-00002"));
                 FileOutputFormat.setOutputPath(job, new Path(outPath + "/iter" + (i+1)));
