@@ -15,7 +15,7 @@ import java.io.IOException;
  * VALUE_OUTPUT:    title of the page
  */
 public class SortingMapper extends Mapper<Text, Text, DoubleWritable, Text> {
-    private DoubleWritable outputKey = new DoubleWritable();
+    private static final DoubleWritable outputKey = new DoubleWritable();
 
     @Override
     protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {

@@ -21,7 +21,7 @@ public class PageRankReducer extends Reducer<Text, Node, Text, Node> {
     private static long nNodes;
     private static final Node outputValue = new Node();
 
-    private final double damping = .8;
+    private static final double damping = .8;
 
     @Override
     protected void setup(Context context) {

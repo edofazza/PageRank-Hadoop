@@ -14,7 +14,7 @@ import java.io.IOException;
  * VALUE_OUTPUT:    Page rank value of the page
  */
 public class SortingReducer extends Reducer<DoubleWritable, Text, Text, Text> {
-    private Text outputValue = new Text();
+    private static final Text outputValue = new Text();
 
     @Override
     protected void reduce(DoubleWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {

@@ -23,6 +23,7 @@ import java.util.Map;
 public class PageRankMapper extends Mapper<Text, Text, Text, Node> {
     private static final Node outputNode = new Node();
     private static long nNodes;
+    private static final TextArray emptyTextArray = new TextArray(); // empty text array
 
      /*
         SCHEMA:
@@ -63,7 +64,7 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Node> {
         // Send to each outgoing edge a split of the mass
         for (Text title : outputNode.getOutgoingEdges().get())
         {
-            outputNode.set(new TextArray(), massToSend); // We use the Node structure for sending the masses
+            outputNode.set(emptyTextArray, massToSend); // We use the Node structure for sending the masses
             context.write(title, outputNode);
         }
     }
