@@ -57,10 +57,11 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Node> {
         // We create a fake edge in order to distinguish this node form possible fake nodes due to the presence
         // of edges that points to not downloaded pages. This types of nodes are called dangling and their mass
         // is lost during the pagerank iteration
-        if (outputNode.getOutgoingEdges().get().length == 0 || outputNode.getOutgoingEdges().get()[0].equals("*")) {
-            //Text[] arrayText = new Text[2];
-            //arrayText[0].set("*");
-            Text[] arrayText = {new Text("*")};
+
+        //if (outputNode.getOutgoingEdges().get().length == 0 || outputNode.getOutgoingEdges().get()[0].equals(" ")) {
+        if (outputNode.getOutgoingEdges().get().length == 0) { // DONE ONLY IN THE FIRST ITERATION
+            Text text = new Text(" ");
+            Text[] arrayText = {text};
             TextArray tmp = new TextArray(arrayText);
             outputNode.setOutgoingEdges(tmp);
             context.write(key, outputNode);

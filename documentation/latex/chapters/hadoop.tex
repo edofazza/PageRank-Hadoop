@@ -27,8 +27,10 @@ For measuring the performance we considered three files with a different number 
 \end{itemize}
 and we test them over different numbers of iteration: 5, 10, 15.
 
+In order to prove the performance gain in \textit{In-Mapper Combiner} instead of counting the nodes in a MapReduce, we provide the result of both the approchies.
+
 \begin{table}[H]
-\caption{Performance}
+\caption{Performance with MapReduce Node Counter}
 \centering
 \begin{tabular}{c c c c}
 \hline\hline
@@ -42,4 +44,19 @@ dataset10.txt&206945&339101&455945 \\ [1ex]
 \label{table:nonlin}
 \end{table}
 
-The values in \textbf{Table 1} are all in milliseconds.
+\begin{table}[H]
+\caption{Performance with In-Mapper}
+\centering
+\begin{tabular}{c c c c}
+\hline\hline
+File & N Iter 5 & N Iter 10 & N Iter 15 \\ [0.7ex] % inserts table %heading
+\hline
+wiki-micro.txt&164519&295216&419528\\
+dataset5.txt&186320&331793&430656 \\
+dataset10.txt&172402&294239&455945 \\ [1ex]
+\hline
+\end{tabular}
+\label{table:nonlin}
+\end{table}
+
+\noindent The values in the \textbf{tables} are expressed in milliseconds.
