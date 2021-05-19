@@ -54,6 +54,18 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Node> {
             outputNode.setPagerank((double)1/nNodes);
 
         // Send the node information to the reducer (for preserving the graph structure)
+        // We create a fake edge in order to distinguish this node form possible fake nodes due to the presence
+        // of edges that points to not downloaded pages. This types of nodes are called dangling and their mass
+        // is lost during the pagerank iteration
+        if (outputNode.getOutgoingEdges().get().length == 0 || outputNode.getOutgoingEdges().get()[0].equals("*")) {
+            //Text[] arrayText = new Text[2];
+            //arrayText[0].set("*");
+            Text[] arrayText = {new Text("*")};
+            TextArray tmp = new TextArray(arrayText);
+            outputNode.setOutgoingEdges(tmp);
+            context.write(key, outputNode);
+            return;
+        }
         context.write(key, outputNode);
 
         double massToSend = outputNode.getPagerank() / outputNode.getOutgoingEdges().get().length;

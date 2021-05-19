@@ -65,6 +65,10 @@ public class Node implements WritableComparable<Node> {
         this.pagerank = Double.parseDouble(split[0]);
     }
 
+    public void setOutgoingEdges(TextArray outgoingEdges) {
+        this.outgoingEdges = outgoingEdges;
+    }
+
     public void setPagerank(final double pagerank) {
         this.pagerank = pagerank;
     }
