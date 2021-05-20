@@ -44,7 +44,6 @@ public class PageRank {
             System.exit(-1);
         if (!pagerankJob(conf, "tmp1", "tmp2", Integer.parseInt(otherArgs[2]), "tmp1/part-r-00000"))
             System.exit(-1);
-        removeDirectory(conf, otherArgs[1]); // remove output folder
 
         boolean finalStatus = sortingJob(conf, "tmp2/iter" + (Integer.parseInt(otherArgs[2])), otherArgs[1]);
         removeDirectory(conf, "tmp2");
