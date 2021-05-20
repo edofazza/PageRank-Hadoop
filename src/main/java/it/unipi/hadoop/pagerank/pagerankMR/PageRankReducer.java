@@ -1,6 +1,7 @@
 package it.unipi.hadoop.pagerank.pagerankMR;
 
 import it.unipi.hadoop.pagerank.model.Node;
+import it.unipi.hadoop.pagerank.model.TextArray;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
@@ -20,6 +21,7 @@ import java.io.IOException;
 public class PageRankReducer extends Reducer<Text, Node, Text, Node> {
     private static long nNodes;
     private static final Node outputValue = new Node();
+    private static final TextArray emptyTextArray = new TextArray();
 
     private static final double damping = .8;
 
@@ -36,8 +38,8 @@ public class PageRankReducer extends Reducer<Text, Node, Text, Node> {
         for (Node value: values) {
             // Check if it is a node or not, if it is a node I get the node structure,
             // otherwise I compute the ingoing mass
-            if (value.getOutgoingEdges() != null && value.getOutgoingEdges().get().length != 0)
-                node = Node.copy(value);
+            if (value.getOutgoingEdges() != null && value.getOutgoingEdges().get().length != 0) // if the array of outgoing edges is not empty means that this is the node structure
+                node = Node.copy(value); // deep copy
             else
                 pagerankSum += value.getPagerank();
         }
@@ -46,6 +48,10 @@ public class PageRankReducer extends Reducer<Text, Node, Text, Node> {
         // The mass received is lost
         if (node == null)
             return;
+
+        // If we have received a fake TextArray, we need to restore the structure before emitting the node
+        if (node.getOutgoingEdges().get()[0].toString().equals(""))
+            node.setOutgoingEdges(emptyTextArray);
 
         outputValue.set(node.getOutgoingEdges(), (1-damping)/(double) nNodes + damping * pagerankSum);
         context.write(key, outputValue);

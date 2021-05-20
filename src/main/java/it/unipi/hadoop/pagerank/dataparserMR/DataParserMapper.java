@@ -28,7 +28,7 @@ public class DataParserMapper extends Mapper<Object, Text, Text, TextArray> {
 
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
-        // All this operations are made only once for each Mapper, not for each map
+        // All this operations are made only once for each Mapper, not for each map function
         Text[] texts = new Text[1];
         texts[0] = new Text(String.valueOf(counter)); // the string representation
         outputValue.set(texts);

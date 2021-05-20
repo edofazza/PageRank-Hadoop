@@ -12,7 +12,7 @@ Since we send two different information between Mapper and Reducer, we have deci
 As for the reducer, it takes care of adding the partial values of the counters to obtain N, the number of nodes; in addition it will get the title and outgoing links values of each record. All this information will be saved in the filesystem, to be processed in the next step. The next step will take in input all the output file containing the Node information. All this process has been schematized in \ref{fig:parsingPhase}
 
 
-\begin{figure}
+\begin{figure}[H]
 	\includegraphics[width=\textwidth]{img/ParserSchema.png}
 	\caption{Parsing phase}
 	\label{fig:parsingPhase}     
@@ -34,7 +34,7 @@ For measuring the performance we considered three files with a different number 
 \end{itemize}
 and we test them over different numbers of iteration: 5, 10, 15.
 
-In order to prove the performance gain in \textit{In-Mapper Combiner} instead of counting the nodes in a MapReduce, we provide the result of both the approches.
+In order to prove the performance gain in \textit{In-Mapper Combiner} instead of counting the nodes in a MapReduce, we provide the result of both the approches. Those results are computed as the mean of 5 iterations.
 
 \begin{table}[H]
 \caption{Performance with MapReduce Node Counter}
