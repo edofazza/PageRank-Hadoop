@@ -1,5 +1,6 @@
 package it.unipi.hadoop.pagerank.model;
 
+import com.google.gson.Gson;
 import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -44,7 +45,7 @@ public class TextArray extends ArrayWritable {
         {
             if (i != 0)
             {
-                finalString.append(",").append(values[i]);
+                finalString.append("\t").append(values[i]);
             }
             else
             {

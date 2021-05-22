@@ -1,13 +1,14 @@
 package it.unipi.hadoop.pagerank.model;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -52,15 +53,13 @@ public class Node implements WritableComparable<Node> {
     public void set (String representation)
     {
         // FORMAT:
-        //      pagerank, outgoing, ...
-        String[] split = representation.trim().split(",");
+        //      pagerank    outgoing1   outgoing2
+        String[] split = representation.trim().split("\t");
 
         // TAKE THE LIST OF OUTGOING EDGES
-        List<Text> list = new ArrayList<>();
+        Text[] outgoingEdges = new Text[split.length - 1];
         for (int i = 1; i < split.length; i++) // i = 1 because we skip the pagerank value (see FORMAT)
-            list.add(new Text(split[i]));
-
-        Text[] outgoingEdges = list.toArray(new Text[0]);
+            outgoingEdges[i-1] = new Text(split[i]);
         this.outgoingEdges = new TextArray(outgoingEdges);
         this.pagerank = Double.parseDouble(split[0]);
     }
@@ -103,7 +102,7 @@ public class Node implements WritableComparable<Node> {
 
     @Override
     public String toString() {
-        return this.pagerank + "," +
+        return this.pagerank + "\t" +
                 this.outgoingEdges.toString();
     }
 }

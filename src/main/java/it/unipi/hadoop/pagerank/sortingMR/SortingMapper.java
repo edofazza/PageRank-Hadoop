@@ -19,7 +19,7 @@ public class SortingMapper extends Mapper<Text, Text, DoubleWritable, Text> {
 
     @Override
     protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
-        String pagerank = value.toString().trim().split(",")[0];
+        String pagerank = value.toString().trim().split("\t")[0];
         outputKey.set(Double.parseDouble(pagerank));
         // pagerank as key in order to have automatic sorting
         // title of the page as value

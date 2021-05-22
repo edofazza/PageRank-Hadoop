@@ -38,10 +38,10 @@ public class DataParserMapper extends Mapper<Object, Text, Text, TextArray> {
     @Override
     protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
         counter++; // at each call of the map function we increase the counter
-        String title = getTitleFromPage(value.toString());
-        outputKey.set(title);
+        String text = value.toString().replace("\t", " "); // remove all tabs, because we use tabs for separating values
+        outputKey.set(getTitleFromPage(text));
         outputValue.set(getOutgoingLinksFromPage(
-                getTextFromPage(value.toString()))
+                getTextFromPage(text))
         );
         context.write(outputKey, outputValue);
     }

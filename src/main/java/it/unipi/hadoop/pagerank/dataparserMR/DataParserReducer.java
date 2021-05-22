@@ -1,5 +1,6 @@
 package it.unipi.hadoop.pagerank.dataparserMR;
 
+import com.google.gson.Gson;
 import it.unipi.hadoop.pagerank.model.Node;
 import it.unipi.hadoop.pagerank.model.TextArray;
 import org.apache.hadoop.io.Text;
@@ -19,6 +20,7 @@ public class DataParserReducer extends Reducer<Text, TextArray, Text, Text> {
     private static Text outputValue = new Text();
     private static TextArray textArray = new TextArray();
     private static Node outputNode = new Node();
+    private final static Gson gson = new Gson();
 
     @Override
     protected void reduce(Text key, Iterable<TextArray> values, Context context) throws IOException, InterruptedException {
