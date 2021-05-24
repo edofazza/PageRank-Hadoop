@@ -40,9 +40,7 @@ public class DataParserMapper extends Mapper<Object, Text, Text, TextArray> {
         counter++; // at each call of the map function we increase the counter
         String text = value.toString().replace("\t", " "); // remove all tabs, because we use tabs for separating values
         outputKey.set(getTitleFromPage(text));
-        outputValue.set(getOutgoingLinksFromPage(
-                getTextFromPage(text))
-        );
+        outputValue.set(getOutgoingLinksFromPage(text));
         context.write(outputKey, outputValue);
     }
 
@@ -61,21 +59,8 @@ public class DataParserMapper extends Mapper<Object, Text, Text, TextArray> {
     }
 
     /**
-     * Function that retrieves the Text field of the page, in which there are the links
-     * @param page      page to parse
-     * @return              The text field
-     */
-    private String getTextFromPage (String page)
-    {
-        String initialString = "<text xml:space=\"preserve\">";
-        return page.substring(
-                page.indexOf(initialString) + initialString.length(),
-                page.indexOf("</text>"));
-    }
-
-    /**
-     * Function that retrieves the outgoing links from the text field of the page
-     * @param text      Text field to analyze
+     * Function that retrieves the outgoing links from the page
+     * @param text      Text to analyze
      * @return          The list of outgoing links
      */
     private Text[] getOutgoingLinksFromPage (String text)

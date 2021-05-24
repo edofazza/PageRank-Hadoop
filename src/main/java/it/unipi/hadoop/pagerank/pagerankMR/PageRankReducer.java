@@ -23,7 +23,7 @@ public class PageRankReducer extends Reducer<Text, Node, Text, Node> {
     private static final Node outputValue = new Node();
     private static final TextArray emptyTextArray = new TextArray();
 
-    private static final double damping = .8;
+    private static final double damping = .80;
 
     @Override
     protected void setup(Context context) {
