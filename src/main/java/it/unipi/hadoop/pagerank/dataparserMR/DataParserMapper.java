@@ -65,9 +65,13 @@ public class DataParserMapper extends Mapper<Object, Text, Text, TextArray> {
      */
     private String getTextFromPage (String page)
     {
-        String initialString = "<text xml:space=\"preserve\">";
+        String startOfTextSection = "<text";
+        int start = page.indexOf(startOfTextSection);
+        // from the end of '<text' go to '>', discarding possible attribute
+        start = page.indexOf(">", start + startOfTextSection.length());
+
         return page.substring(
-                page.indexOf(initialString) + initialString.length(),
+                start + 1, // start from the character following '>'
                 page.indexOf("</text>"));
     }
 
