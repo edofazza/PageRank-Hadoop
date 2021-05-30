@@ -68,7 +68,7 @@ public class Node implements WritableComparable<Node> {
     }
 
     public static Node copy(final Node node) {
-        return new Node(node.getOutgoingEdges(), node.pagerank);
+        return new Node(node.getOutgoingEdges(), node.getPagerank());
     }
 
     @Override

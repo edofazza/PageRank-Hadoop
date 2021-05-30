@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * Reducer of the Page Rank process
  * KEY_INPUT:       title of the page
- * VALUE_INPUT:     node information
+ * VALUE_INPUT:     node information (or mass received)
  * KEY_OUTPUT:      title of the page
  * VALUE_OUTPUT:    node information
  *
@@ -21,7 +21,6 @@ import java.io.IOException;
 public class PageRankReducer extends Reducer<Text, Node, Text, Node> {
     private static long nNodes;
     private static final Node outputValue = new Node();
-    private static final TextArray emptyTextArray = new TextArray();
 
     private static final double damping = .80;
 
@@ -36,22 +35,22 @@ public class PageRankReducer extends Reducer<Text, Node, Text, Node> {
         Node node = null;
 
         for (Node value: values) {
-            // Check if it is a node or not, if it is a node I get the node structure,
-            // otherwise I compute the ingoing mass
-            if (value.getOutgoingEdges() != null && value.getOutgoingEdges().get().length != 0) // if the array of outgoing edges is not empty means that this is the node structure
-                node = Node.copy(value); // deep copy
-            else
+            // If it is not a Node structure means that is a mass received
+            if (value.getOutgoingEdges() != null && value.getOutgoingEdges().get().length != 0
+                && value.getOutgoingEdges().get()[0].toString().equals("")) // fake TextArray
+            {
                 pagerankSum += value.getPagerank();
+            }
+            else // If it is node structure
+            {
+                node = Node.copy(value); // deep copy
+            }
         }
 
         // If we have received only mass without the Node structure means that this is not a node
         // The mass received is lost
         if (node == null)
             return;
-
-        // If we have received a fake TextArray, we need to restore the structure before emitting the node
-        if (node.getOutgoingEdges().get()[0].toString().equals(""))
-            node.setOutgoingEdges(emptyTextArray);
 
         outputValue.set(node.getOutgoingEdges(), (1-damping)/(double) nNodes + damping * pagerankSum);
         context.write(key, outputValue);

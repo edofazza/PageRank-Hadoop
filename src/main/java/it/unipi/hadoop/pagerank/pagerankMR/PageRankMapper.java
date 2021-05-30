@@ -23,8 +23,7 @@ import java.util.Map;
 public class PageRankMapper extends Mapper<Text, Text, Text, Node> {
     private static final Node outputNode = new Node();
     private static long nNodes;
-    private static final TextArray emptyTextArray = new TextArray();
-    private static TextArray fakeTextArray;
+    private static TextArray fakeTextArray; // A fake array used to discriminate the situation when we need to send mass
      /*
         SCHEMA:
             (1) -> (2) (3)
@@ -58,24 +57,15 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Node> {
             outputNode.setPagerank((double)1/nNodes);
 
         /* Send the node information to the reducer (for preserving the graph structure) */
-
-        // We create a fake set of edges, to distinguish the case in which I have a node without outgoing links
-        // Indeed, in this case I have an empty text array, but we used an empty TextArray also when we send mass
-        if (outputNode.getOutgoingEdges().get().length == 0) {
-            outputNode.setOutgoingEdges(fakeTextArray);
-            context.write(key, outputNode);
-            return;
-        }
-        context.write(key, outputNode); // standard situation, we send the structure unmodified
+        context.write(key, outputNode);
 
         /* Split the mass of the node and send it to outgoing edges */
-
         double massToSend = outputNode.getPagerank() / outputNode.getOutgoingEdges().get().length;
 
         // Send to each outgoing edge a split of the mass
         for (Text title : outputNode.getOutgoingEdges().get())
         {
-            outputNode.set(emptyTextArray, massToSend); // We use the Node structure for sending the masses
+            outputNode.set(fakeTextArray, massToSend); // We use Node objects for sending the masses
             context.write(title, outputNode);
         }
     }
