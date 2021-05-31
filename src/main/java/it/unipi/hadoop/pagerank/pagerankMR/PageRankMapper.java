@@ -23,7 +23,7 @@ import java.util.Map;
 public class PageRankMapper extends Mapper<Text, Text, Text, Node> {
     private static final Node outputNode = new Node();
     private static long nNodes;
-    private static TextArray fakeTextArray; // A fake array used to discriminate the situation when we need to send mass
+    private static final TextArray emptyTextArray = new TextArray();
      /*
         SCHEMA:
             (1) -> (2) (3)
@@ -43,10 +43,6 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Node> {
     @Override
     protected void setup(Context context) {
         nNodes = Long.parseLong(context.getConfiguration().get("nNodes"));
-        // This operations are performed only once, we need to prepare the fake text array
-        Text text = new Text("");
-        Text[] arrayText = {text};
-        fakeTextArray = new TextArray(arrayText); // TextArray with the first element ""
     }
 
     @Override
@@ -56,16 +52,19 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Node> {
         if (outputNode.getPagerank() == -1) // if it is the first time for this record
             outputNode.setPagerank((double)1/nNodes);
 
-        /* Send the node information to the reducer (for preserving the graph structure) */
-        context.write(key, outputNode);
-
-        /* Split the mass of the node and send it to outgoing edges */
+        /* Split the mass of the node */
         double massToSend = outputNode.getPagerank() / outputNode.getOutgoingEdges().get().length;
+
+        /* Send the node information to the reducer (for preserving the graph structure) */
+        outputNode.setPagerank(-1); // -1 is an impossible rank value, used to discriminate the situation in which we send the structure
+        context.write(key, outputNode);
 
         // Send to each outgoing edge a split of the mass
         for (Text title : outputNode.getOutgoingEdges().get())
         {
-            outputNode.set(fakeTextArray, massToSend); // We use Node objects for sending the masses
+            // We use Node objects for sending the masses,
+            // with an empty text array as outgoing links (no reason to transmit the real list, that can be huge)
+            outputNode.set(emptyTextArray, massToSend);
             context.write(title, outputNode);
         }
     }

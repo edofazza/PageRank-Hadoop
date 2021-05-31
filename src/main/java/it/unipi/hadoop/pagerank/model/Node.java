@@ -66,7 +66,6 @@ public class Node implements WritableComparable<Node> {
     public void setPagerank(final double pagerank) {
         this.pagerank = pagerank;
     }
-
     public static Node copy(final Node node) {
         return new Node(node.getOutgoingEdges(), node.getPagerank());
     }

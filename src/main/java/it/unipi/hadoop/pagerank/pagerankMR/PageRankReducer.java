@@ -34,16 +34,15 @@ public class PageRankReducer extends Reducer<Text, Node, Text, Node> {
         double pagerankSum = 0;
         Node node = null;
 
-        for (Node value: values) {
-            // If it is not a Node structure means that is a mass received
-            if (value.getOutgoingEdges() != null && value.getOutgoingEdges().get().length != 0
-                && value.getOutgoingEdges().get()[0].toString().equals("")) // fake TextArray
-            {
-                pagerankSum += value.getPagerank();
-            }
-            else // If it is node structure
+        for (Node value: values)
+        {
+            if (value.getPagerank() == -1) // If this is the node structure
             {
                 node = Node.copy(value); // deep copy
+            }
+            else // if it is mass received
+            {
+                pagerankSum += value.getPagerank();
             }
         }
 
