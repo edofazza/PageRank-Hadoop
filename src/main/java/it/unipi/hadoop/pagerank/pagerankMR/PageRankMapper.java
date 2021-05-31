@@ -62,8 +62,7 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Node> {
         // Send to each outgoing edge a split of the mass
         for (Text title : outputNode.getOutgoingEdges().get())
         {
-            // We use Node objects for sending the masses,
-            // with an empty text array as outgoing links (no reason to transmit the real list, that can be huge)
+            // We use Node objects for sending the masses
             outputNode.set(emptyTextArray, massToSend);
             context.write(title, outputNode);
         }
