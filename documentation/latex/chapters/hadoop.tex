@@ -1,8 +1,125 @@
 \section{Hadoop Implementation}
-\subsection{Introduction}
-In this section is briefly described how we have implemented in Hadoop the pseudocode presented in the previous chapter. After that, the performance evaluation of the computation is reported.
 
-\subsection{First Phase: Graph construction}
+\subsection{Introduction}
+In this section a description of the MapReduce implementation of \textit{Page Rank} is given.
+The algorithm is carried out in \textbf{three distinct steps}:
+\begin{enumerate}
+	\item \textit{Graph Construction} phase
+	\item \textit{Page Rank Computation} phase
+	\item \textit{Sorting} phase
+\end{enumerate}
+
+\noindent We have decided to represent the structure of the graph through adjacency lists, so each node (that represents a page) will keep the list of outgoing edges as status information, as well as its ranking.
+
+\subsection{First Phase: Graph Construction}
+In this phase we parse the information in the input file taking the information that interests us, i.e. the title of the page and the outgoing edges. In addition to this, we take advantage of this phase to also perform the count of the graph nodes.
+
+\begin{algorithm}[H]
+	\caption{Graph Construction Mapper}\label{Mapper}
+		\begin{algorithmic}[1]
+			\Procedure{Map}{PageId id, Page p}
+					\State $\textit{title} \gets \textit{getTitle(p)}$
+					\State $ outgoingEdges \gets \textit{getOutgoingEdges(p)}$
+		
+					\State EMIT(title, outgoingEdges)
+			\EndProcedure
+			
+			
+	\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+	\caption{Graph Construction Reducer}\label{Reducer}
+		\begin{algorithmic}[1]
+			\Procedure{InitReduce}{Configuration c}
+				\State $N \gets c.numberOfNodes$
+			\EndProcedure
+		
+			\Procedure{Reduce}{Title t, ListOfListOfEdges $[e_1, e_2, \dots]$}
+					\State $\textit{initialPageRank} \gets \frac{1}{N} $
+					\State $ \textit{edges} \gets e_1$
+		
+					\State EMIT(title, \{initialPageRank, edges\})
+				
+			\EndProcedure
+		\end{algorithmic}
+\end{algorithm}
+
+\noindent In \textit{Algorithm 4} only $e_1$ is considered because the title is a unique identifier of the pages, so the list of input values will always consist of a single element. Only one mapper will manage one page.
+
+\subsection{Second Phase: PageRank Estimation}
+In this section, the pagerank iteration is presented.
+\noindent The number of iteration is fixed at the start of the execution. We do not converge to a (or a more or less) consistent state, because the presence of dangling nodes will cause importance (i.e., pagerank mass) to leak out.
+
+\begin{algorithm}
+	\caption{PageRank Computation Mapper}\label{Mapper}
+		\begin{algorithmic}[1]
+						\Procedure{Map}{Key k, FormattedPage p}
+			
+			\State EMIT(p.title, \{0, p.outgoingEdges\})
+			\ForAll{outgoingEdge \textbf{in} p.outgoingEdges}
+			\State EMIT(outgoingEdge, $\{\frac{p.pagerank}{p.outgoingEdges.length}, NULL\}$)
+			\EndFor
+			\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+Note: \textit{outgoingEdge} is a title itself.
+
+
+\begin{algorithm}[H]
+	\caption{PageRank Computation Reducer}\label{Reducer}
+		\begin{algorithmic}[1]
+			\Procedure{InitReduce}{Configuration c}
+				\State $N \gets c.numberOfNodes$
+				\State $D \gets Damping$
+			\EndProcedure
+		
+			\Procedure{Reduce}{Title t, Nodes $[n_1, n_2, \dots]$}
+					\State n \textbf{new} Node
+					\ForAll {node \textbf{in} nodes}
+						\If {node.hasOutgoingEdges()}
+							\State n.outgoingEdges = node.outgoingEdges
+						\Else
+							\State $s = s + node.pagerank$
+						\EndIf
+					\EndFor
+					\State$n.pagerank =  \frac{(1-D)}{N} + D*s$
+					\State EMIT(t, n)
+			\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+
+
+\subsection{Third Phase: Sorting}
+The final step is sorting the webpages by decreasing rank, this is done making advantage of the sorting mechanism of MapReduce.
+
+\begin{algorithm}[H]
+	\caption{Sorting Mapper}\label{Mapper}
+	\begin{algorithmic}[1]
+		\Procedure{Map}{Key k, FormattedPage p}
+		\State $title \gets p.title$
+		\State $pagerank \gets p.pagerank$k
+		\State EMIT(pagerank, title)
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+	\caption{Sorting Reducer}\label{Reducer}
+	\begin{algorithmic}[1]
+		\Procedure{Reduce}{Pagerank rank, Titles $[t_1, t_2, \dots]$}
+		\ForAll {title \textbf{in} titles}
+		\State EMIT(title, rank)
+		\EndFor
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+\subsection{Implementations Details}
+In this following sections is briefly described how we have implemented in Hadoop the pseudocode presented in the previous chapter. After that, the performance evaluation of the computation is reported.
+
+\subsubsection{First Phase: Graph construction}
 Parsing is a job that doesn't need to create a conglomerate value, but it creates records which, each of them, is treated as a standalone piece of information. We decide to use three reducers since we have three working nodes.
 
 \noindent Initially we had thought of inserting an initial step dedicated exclusively to the node count, but later we came up with a better solution, complicating the parsing phase. In the section on performance the differences between the two approaches will be shown, showing the improvement obtained.
@@ -18,11 +135,11 @@ As for the reducer, it takes care of adding the partial values of the counters t
 	\label{fig:parsingPhase}     
 \end{figure}
 
-\subsection{Second Phase: PageRank Estimation}
+\subsubsection{Second Phase: PageRank Estimation}
 Since the previous phase constructs multiple outputs, this phase has to take multiple inputs
 As in the \textit{Graph construction} phase multiple reducers are used for accelerating the computation. Thus, from the first iteration to the last one this MapReduce computation takes multiple inputs and produces multiple outputs.
 
-\subsection{Third Phase: Sorting}
+\subsubsection{Third Phase: Sorting}
 Since the previous phase constructs multiple outputs, also this phase has to take multiple inputs. Here a single reducer is used in order to take advantage of the automatic sorting done over the keys by Hadoop. Keys are in this case the pagerank value of each page, and are passed by the mapper to the reducer as \textbf{DoubleWritable} objects. We have implemented a \textbf{WritableComparator} for getting the descending order.
 
 \subsection{Performance}
