@@ -1,5 +1,57 @@
 \section{PageRank}
 
+\subsection{Pseudocode}
+\begin{algorithm}[H]
+	\caption{PageRank}\label{General}
+		\begin{algorithmic}[1]
+			
+			\Procedure{Counting Nodes}{dataset d}
+				\State $N \gets d.countNodes()$
+				\State \Return N
+			\EndProcedure
+\newline			
+			\Procedure{Graph Construction - Parsing}{dataset d}
+				\State nodesList \textit{new} \textbf{AssociativeArray}
+				\ForAll {page \textit{in} d}
+					\State $title \gets page.getTitle()$
+					\State $outgoingEdges \gets page.getOutgoingEdges()$
+					\State $nodeLists.add(\{ title, outgoingEdges\}) $
+				\EndFor
+				\State \Return nodesList
+			\EndProcedure
+	\newline		
+			\Procedure{Compute PageRank}{nodesList NL, numberOfNodes N, nOfIterations NI}
+				\State $NL.addInitPageRankToNodes(\frac{1}{N})$
+				
+				\For { i \textbf{in} range(NI)}
+					\State NL.Map()
+					\State NL.Reduce()
+				\EndFor
+				\State NL.sortByPagerank()
+				
+			\EndProcedure
+\newline
+			\Procedure{Map}{title t, \{outgoingEdges oe, pagerank p\}}
+				\ForAll {e \textbf{in} oe}
+					\State EMIT(e, $\frac{p}{oe.length}$)
+				\EndFor
+			\EndProcedure
+						
+			\Procedure{Reduce}{title t, pagerankContributions [$p_1, p_2, \dots $]}
+				\State $damping \gets 0.8$
+				\State $sum \gets 0$
+				\State $N \gets numberOfNodes$
+				
+				\ForAll p \textbf{in} pagerankContributions
+					\State $sum \gets sum + p$
+				\EndFor
+				
+				\State $pagerank =  \frac{(1-damping)}{N} + damping*sum$
+				\State EMIT(t, pagerank)
+			\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
 \subsection{Introduction}
 In this section a description of the MapReduce implementation of \textit{Page Rank} is given.
 The algorithm is carried out in \textbf{three distinct steps}:
@@ -9,14 +61,10 @@ The algorithm is carried out in \textbf{three distinct steps}:
 	\item \textit{Sorting} phase
 \end{enumerate}
 
-
 \noindent We have decided to represent the structure of the graph through adjacency lists, so each node (that represents a page) will keep the list of outgoing edges as status information, as well as its ranking.
-
 
 \subsection{First Phase: Graph Construction}
 In this phase we parse the information in the input file taking the information that interests us, i.e. the title of the page and the outgoing edges. In addition to this, we take advantage of this phase to also perform the count of the graph nodes.
-
-ALGORITMI DA RISCRIVERE ALLA FINE!!!
 
 \begin{algorithm}[H]
 	\caption{Graph Construction Mapper}\label{Mapper}
