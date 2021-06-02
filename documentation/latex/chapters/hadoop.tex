@@ -11,95 +11,122 @@ The algorithm is carried out in \textbf{three distinct steps}:
 
 \noindent We have decided to represent the structure of the graph through adjacency lists, so each node (that represents a page) will keep the list of outgoing edges as status information, as well as its ranking.
 
-\subsection{First Phase: Graph Construction}
+\subsection{Pseudocode}
+In this chapter we will report a pseudocode of the three phases, to better understand the implementation in Hadoop.
+\subsubsection{First Phase: Graph Construction}
 In this phase we parse the information in the input file taking the information that interests us, i.e. the title of the page and the outgoing edges. In addition to this, we take advantage of this phase to also perform the count of the graph nodes.
 
 \begin{algorithm}[H]
-	\caption{Graph Construction Mapper}\label{Mapper}
+	\caption{Graph Construction Mapper}\label{GraphConstructionMapper}
 		\begin{algorithmic}[1]
+			\Procedure{Setup}{}
+				\State $\textit{counter} \gets \textit{0}$
+			\EndProcedure
 			\Procedure{Map}{PageId id, Page p}
 					\State $\textit{title} \gets \textit{getTitle(p)}$
 					\State $ outgoingEdges \gets \textit{getOutgoingEdges(p)}$
-		
+					\State $\textit{counter} \gets \textit{counter + 1}$
 					\State EMIT(title, outgoingEdges)
 			\EndProcedure
-			
+			\Procedure{Cleanup}{}
+				\State EMIT("", \textit{counter})	
+			\EndProcedure
 			
 	\end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}[H]
-	\caption{Graph Construction Reducer}\label{Reducer}
+	\caption{Graph Construction Reducer}\label{GraphConstructionReducer}
 		\begin{algorithmic}[1]
-			\Procedure{InitReduce}{Configuration c}
-				\State $N \gets c.numberOfNodes$
-			\EndProcedure
+
+	\Procedure{Reduce}{Title t, $[e_1, e_2, \dots]$}
+		\State $\textit{initialPageRank} \gets -1 $
+		\If{t == ""}
+		\Comment{If these are the counters}
+		\State $globalCounter \gets$ 0
+		\ForAll {e \textit{in} $[e_1, e_2, \dots]$}
+		\State $globalCounter \gets globalCounter + e$
+		\EndFor
+		\State EMIT("", globalCounter)
+		\Else
+		\State $edges \gets e_1$
+		\State EMIT(t, \{initialPageRank, edges\})
+		\EndIf
 		
-			\Procedure{Reduce}{Title t, ListOfListOfEdges $[e_1, e_2, \dots]$}
-					\State $\textit{initialPageRank} \gets \frac{1}{N} $
-					\State $ \textit{edges} \gets e_1$
-		
-					\State EMIT(title, \{initialPageRank, edges\})
-				
-			\EndProcedure
+	\EndProcedure
 		\end{algorithmic}
 \end{algorithm}
 
-\noindent In \textit{Algorithm 4} only $e_1$ is considered because the title is a unique identifier of the pages, so the list of input values will always consist of a single element. Only one mapper will manage one page.
+\noindent In \textit{Algorithm 3} only $e_1$ is considered as edges because the title is a unique identifier of the pages, so the list of input values will always consist of a single element. Only one mapper will manage one page. This is not the case when we receive the local counters from the mappers. More information can be found in the "Implementations Details" chapter.
 
-\subsection{Second Phase: PageRank Estimation}
+\subsubsection{Second Phase: PageRank Estimation}
 In this section, the pagerank iteration is presented.
-\noindent The number of iteration is fixed at the start of the execution. We do not converge to a (or a more or less) consistent state, because the presence of dangling nodes will cause importance (i.e., pagerank mass) to leak out.
+\noindent The number of iteration is fixed at the start of the execution. So the termination condition is the number of iterations.
 
 \begin{algorithm}
 	\caption{PageRank Computation Mapper}\label{Mapper}
 		\begin{algorithmic}[1]
-						\Procedure{Map}{Key k, FormattedPage p}
 			
-			\State EMIT(p.title, \{0, p.outgoingEdges\})
-			\ForAll{outgoingEdge \textbf{in} p.outgoingEdges}
-			\State EMIT(outgoingEdge, $\{\frac{p.pagerank}{p.outgoingEdges.length}, NULL\}$)
+			\Procedure{Setup}{}
+			\State $N \gets numberOfNodes$
+			\EndProcedure
+			
+			\Procedure{Map}{Key k, Node n}
+			\If{n.pagerank == -1}
+			\Comment{First time}
+			\State $n.pagerank = \frac{1}{N}$
+			\EndIf
+			\State EMIT(n.title, \{-1, n.outgoingEdges\}) \Comment{Pass along the graph structure}
+			\State $massToSend = \frac{n.pagerank}{n.outgoingEdges.length}$
+			\ForAll{outgoingEdge \textbf{in} n.outgoingEdges}
+			\State EMIT(outgoingEdge, $\{massToSend, []\}$)
+			\Comment{Pass PageRank mass to neighbors}
 			\EndFor
 			\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
-Note: \textit{outgoingEdge} is a title itself.
+\noindent Note: \textit{outgoingEdge} is a title itself.
 
 
 \begin{algorithm}[H]
 	\caption{PageRank Computation Reducer}\label{Reducer}
 		\begin{algorithmic}[1]
-			\Procedure{InitReduce}{Configuration c}
-				\State $N \gets c.numberOfNodes$
-				\State $D \gets Damping$
+			\Procedure{Setup}{}
+				\State $N \gets numberOfNodes$
+				\State $damping \gets 0.8$
 			\EndProcedure
 		
 			\Procedure{Reduce}{Title t, Nodes $[n_1, n_2, \dots]$}
-					\State n \textbf{new} Node
-					\ForAll {node \textbf{in} nodes}
-						\If {node.hasOutgoingEdges()}
-							\State n.outgoingEdges = node.outgoingEdges
-						\Else
-							\State $s = s + node.pagerank$
-						\EndIf
-					\EndFor
-					\State$n.pagerank =  \frac{(1-D)}{N} + D*s$
-					\State EMIT(t, n)
+			\State $s \gets 0$
+			\Comment{Ingoing mass}
+			\State $n \gets null$
+			\ForAll {node \textbf{in} nodes}
+				\If {node.pagerank == -1}
+					\State $n \gets node$
+				\Else
+					\State $s \gets s + node.pagerank$
+				\EndIf
+			\EndFor
+			\If{n != null}
+			\Comment{If it is a node}
+				\State$n.pagerank \gets  \frac{(1-D)}{N} + D*s$
+				\State EMIT(t, n)
+			\EndIf
 			\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
 
 
 
-\subsection{Third Phase: Sorting}
+\subsubsection{Third Phase: Sorting}
 The final step is sorting the webpages by decreasing rank, this is done making advantage of the sorting mechanism of MapReduce.
 
 \begin{algorithm}[H]
 	\caption{Sorting Mapper}\label{Mapper}
 	\begin{algorithmic}[1]
-		\Procedure{Map}{Key k, FormattedPage p}
-		\State $title \gets p.title$
-		\State $pagerank \gets p.pagerank$k
+		\Procedure{Map}{Key k, Node n}
+		\State $title \gets n.title$
+		\State $pagerank \gets n.pagerank$
 		\State EMIT(pagerank, title)
 		\EndProcedure
 	\end{algorithmic}
@@ -117,7 +144,7 @@ The final step is sorting the webpages by decreasing rank, this is done making a
 \end{algorithm}
 
 \subsection{Implementations Details}
-In this following sections is briefly described how we have implemented in Hadoop the pseudocode presented in the previous chapter. After that, the performance evaluation of the computation is reported.
+In these following chapters is briefly described how we have implemented the pseudocode. After that, the performance evaluation of the computation is reported.
 
 \subsubsection{First Phase: Graph construction}
 Parsing is a job that doesn't need to create a conglomerate value, but it creates records which, each of them, is treated as a standalone piece of information. We decide to use three reducers since we have three working nodes.
@@ -151,7 +178,7 @@ For measuring the performance we considered three files with a different number 
 \end{itemize}
 and we test them over different numbers of iteration: 5, 10, 15.
 
-In order to prove the performance gain in \textit{In-Mapper Combiner} instead of counting the nodes in a MapReduce, we provide the result of both the approches. Those results are computed as the mean of 5 iterations.
+\noindent In order to prove the performance gain in \textit{In-Mapper Combiner} instead of counting the nodes in a MapReduce, we provide the result of both the approches. Those results are computed as the mean of 5 iterations.
 
 \begin{table}[H]
 \caption{Performance with MapReduce Node Counter}
