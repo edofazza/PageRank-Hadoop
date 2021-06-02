@@ -51,6 +51,7 @@ public class PageRankReducer extends Reducer<Text, Node, Text, Node> {
         if (node == null)
             return;
 
+        // Compute the page_rank using the formula
         outputValue.set(node.getOutgoingEdges(), (1-damping)/(double) nNodes + damping * pagerankSum);
         context.write(key, outputValue);
     }
