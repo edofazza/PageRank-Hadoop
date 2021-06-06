@@ -68,7 +68,6 @@ public class GenerateData {
 
             output += "</text>\n";
             try {
-                //Files.write(Paths.get("cipherCodeRepo/cipherFavorite/cipherUser"+ nFile + ".txt"), query.getBytes(), StandardOpenOption.APPEND);
                 Files.write(Paths.get("data/dataset10.txt"), output.getBytes(), StandardOpenOption.APPEND);
             }catch (IOException e) {
                 e.printStackTrace();
