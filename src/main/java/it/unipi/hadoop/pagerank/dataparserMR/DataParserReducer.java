@@ -1,6 +1,5 @@
 package it.unipi.hadoop.pagerank.dataparserMR;
 
-import com.google.gson.Gson;
 import it.unipi.hadoop.pagerank.model.Node;
 import it.unipi.hadoop.pagerank.model.TextArray;
 import org.apache.hadoop.io.Text;

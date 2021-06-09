@@ -71,7 +71,7 @@ public class PageRank {
         job.setReducerClass(DataParserReducer.class);
         job.setPartitionerClass(ParserPartitioner.class);
 
-        // I can use all the machines for running the reduce task, i will obtain different output files
+        // I can use all the machines for running the reduce task, I will obtain different output files
         job.setNumReduceTasks(HOW_MANY_REDUCER);
 
         FileInputFormat.addInputPath(job,  new Path(inPath));
